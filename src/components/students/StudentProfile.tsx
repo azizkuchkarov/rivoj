@@ -1,0 +1,214 @@
+import Link from "next/link";
+
+import { Baby, Calendar, Pencil, Phone, User } from "lucide-react";
+
+import { deleteStudent } from "@/app/students/actions";
+import { DeleteConfirmForm } from "@/components/common/DeleteConfirmForm";
+import {
+  StudentPaymentsSection,
+  type GuardianDebtRow,
+} from "@/components/students/StudentPaymentsSection";
+import { StudentScheduleSection, type StudentProfileLesson } from "@/components/students/StudentScheduleSection";
+import { Avatar } from "@/components/teachers/Avatar";
+import type { Payment, Student, Teacher } from "@/generated/prisma/client";
+import { ageFromDateOfBirth } from "@/lib/age";
+import { formatStudentGender } from "@/lib/student-gender";
+
+type PaymentWithTeacher = Payment & {
+  teacher: Pick<Teacher, "id" | "fullName"> | null;
+  lesson: {
+    teacher: { id: string; fullName: string; listNumber: number };
+  } | null;
+};
+
+type StudentProfileProps = {
+  student: Student & { primaryTeacher: Pick<Teacher, "id" | "fullName" | "title"> | null };
+  paymentSummary?: { totalSom: number; count: number };
+  payments?: PaymentWithTeacher[];
+  guardianDebts?: GuardianDebtRow[];
+  debtTotalSom?: number;
+  subscriptionLessonsRemainingTotal?: number;
+  upcomingLessons?: StudentProfileLesson[];
+};
+
+export function StudentProfile({
+  student,
+  paymentSummary,
+  payments = [],
+  guardianDebts = [],
+  debtTotalSom = 0,
+  subscriptionLessonsRemainingTotal = 0,
+  upcomingLessons = [],
+}: StudentProfileProps) {
+  const totalSom = paymentSummary?.totalSom ?? 0;
+  const created = new Intl.DateTimeFormat("uz-UZ", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(student.createdAt);
+
+  const dobFormatted =
+    student.dateOfBirth != null
+      ? new Intl.DateTimeFormat("uz-UZ", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }).format(student.dateOfBirth)
+      : null;
+
+  const age = student.dateOfBirth != null ? ageFromDateOfBirth(student.dateOfBirth) : null;
+  const genderLabel = formatStudentGender(student.gender);
+
+  return (
+    <div className="space-y-8">
+      <section className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-gradient-to-br from-white via-violet-50/40 to-fuchsia-50/20 p-8 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.45)] md:p-10">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-violet-400/15 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 left-10 h-48 w-48 rounded-full bg-fuchsia-300/15 blur-3xl" />
+
+        <div className="relative flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end">
+            <Avatar name={student.fullName} size="xl" />
+            <div className="min-w-0 space-y-2 pb-0.5">
+              <div className="flex flex-wrap items-center gap-2">
+                {student.isActive ? (
+                  <span className="inline-flex items-center rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-900 ring-1 ring-emerald-400/30">
+                    Faol
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center rounded-full bg-zinc-200/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-700">
+                    Nofaol
+                  </span>
+                )}
+                {age !== null ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-violet-950 ring-1 ring-violet-100">
+                    <Baby className="h-3.5 w-3.5" aria-hidden />
+                    {age} yosh
+                  </span>
+                ) : null}
+              </div>
+              <h1 className="text-3xl font-semibold tracking-tight text-[var(--ink)] md:text-4xl">
+                {student.fullName}
+              </h1>
+              {genderLabel ? (
+                <p className="text-lg text-[var(--muted)]">{genderLabel}</p>
+              ) : null}
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
+            <Link
+              href={`/students/${student.id}/edit`}
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full border border-violet-200/80 bg-white/90 px-5 py-2.5 text-sm font-semibold text-violet-900 shadow-sm transition hover:border-violet-300 hover:bg-violet-50"
+            >
+              <Pencil className="h-4 w-4" aria-hidden />
+              Profilni tahrirlash
+            </Link>
+            <DeleteConfirmForm
+              action={deleteStudent}
+              id={student.id}
+              displayName={student.fullName}
+              entityLabel="O‘quvchini"
+            />
+          </div>
+        </div>
+
+        {student.focusAreas.length > 0 ? (
+          <ul className="relative mt-8 flex flex-wrap gap-2">
+            {student.focusAreas.map((s) => (
+              <li
+                key={s}
+                className="rounded-full bg-white/90 px-4 py-1.5 text-sm font-medium text-violet-950 ring-1 ring-violet-100 shadow-sm"
+              >
+                {s}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <aside className="space-y-4 lg:col-span-1">
+          <div className="rounded-3xl border border-white/60 bg-[color:var(--surface)] p-6 shadow-lg shadow-black/5">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Vasiy</h2>
+            <ul className="mt-4 space-y-4 text-[var(--ink-soft)]">
+              <li className="flex gap-3">
+                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-violet-50 text-violet-800 ring-1 ring-violet-100">
+                  <User className="h-4 w-4" aria-hidden />
+                </span>
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">Ism</p>
+                  <p className="font-medium text-[var(--ink)]">{student.guardianName ?? "—"}</p>
+                </div>
+              </li>
+              <li className="flex gap-3">
+                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-violet-50 text-violet-800 ring-1 ring-violet-100">
+                  <Phone className="h-4 w-4" aria-hidden />
+                </span>
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">Telefon</p>
+                  <p className="font-medium text-[var(--ink)]">{student.guardianPhone ?? "—"}</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div className="rounded-3xl border border-white/60 bg-[color:var(--surface)] p-6 shadow-lg shadow-black/5">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Sana va biriktirish</h2>
+            <ul className="mt-3 space-y-3 text-sm text-[var(--muted)]">
+              <li className="flex items-start gap-2">
+                <Calendar className="mt-0.5 h-4 w-4 shrink-0 text-violet-700" aria-hidden />
+                <span>
+                  Tug‘ilgan sana:{" "}
+                  <span className="font-medium text-[var(--ink)]">{dobFormatted ?? "—"}</span>
+                </span>
+              </li>
+              <li>
+                Asosiy o‘qituvchi:{" "}
+                {student.primaryTeacher ? (
+                  <Link
+                    href={`/teachers/${student.primaryTeacher.id}`}
+                    className="font-medium text-violet-800 underline-offset-4 hover:underline"
+                  >
+                    {student.primaryTeacher.fullName}
+                  </Link>
+                ) : (
+                  <span className="font-medium text-[var(--ink)]">—</span>
+                )}
+                {student.primaryTeacher?.title ? (
+                  <span className="text-zinc-400"> ({student.primaryTeacher.title})</span>
+                ) : null}
+              </li>
+              <li className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 shrink-0 text-violet-700" aria-hidden />
+                Ro‘yxatga olingan: {created}
+              </li>
+            </ul>
+          </div>
+        </aside>
+
+        <article className="space-y-6 lg:col-span-2">
+          <StudentScheduleSection lessons={upcomingLessons} />
+
+          <StudentPaymentsSection
+            studentId={student.id}
+            studentFullName={student.fullName}
+            payments={payments}
+            primaryTeacher={student.primaryTeacher}
+            guardianDebts={guardianDebts}
+            totalSom={totalSom}
+            debtTotalSom={debtTotalSom}
+            subscriptionLessonsRemainingTotal={subscriptionLessonsRemainingTotal}
+          />
+
+          {student.notes?.trim() ? (
+            <div className="h-full rounded-3xl border border-white/60 bg-[color:var(--surface)] p-8 shadow-lg shadow-black/5">
+              <h2 className="text-lg font-semibold text-[var(--ink)]">Izoh</h2>
+              <p className="mt-4 whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--ink-soft)]">
+                {student.notes.trim()}
+              </p>
+            </div>
+          ) : null}
+        </article>
+      </div>
+    </div>
+  );
+}

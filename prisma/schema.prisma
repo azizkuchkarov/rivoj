@@ -1,0 +1,249 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum LessonKind {
+  LESSON
+  CONSULTATION
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  TRANSFER
+  OTHER
+}
+
+/// Kunlik yoki abonentlik to‘lovi
+enum PaymentKind {
+  DAILY
+  SUBSCRIPTION
+}
+
+/// Darsda bola keldi / kelmadi
+enum LessonAttendance {
+  UNMARKED
+  ABSENT
+  PRESENT
+}
+
+/// Kelgan bolaning bir darsdagi to‘lovi (kelmagan bo‘lsa NA)
+enum LessonGuardianFee {
+  NA
+  PAID
+  UNPAID
+}
+
+/// O‘qituvchiga bu dars uchun pul kim tomonidan
+enum TeacherEarningPayer {
+  GUARDIAN
+  CENTER
+}
+
+/// Logopedik markaz mutaxassisi
+model Teacher {
+  id              String    @id @default(cuid())
+  /// Ro‘yxat va jadvalda tartib raqami (№)
+  listNumber      Int       @default(0)
+  fullName        String
+  /// Konsultatsiya jadvalida qatnashadi
+  offersConsultation Boolean @default(false)
+  /// Masalan: katta logoped, defektolog
+  title           String?
+  phone           String?
+  /// Rasm URL (keyingida yuklash uchun)
+  photoUrl        String?
+  /// Mutaxassislik yo‘nalishlari
+  specialties     String[]  @default([])
+  experienceYears Int?
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  students Student[]
+  lessons Lesson[]
+  payments Payment[]
+  teacherLessonEarnings TeacherLessonEarning[]
+
+  @@index([isActive])
+  @@index([fullName])
+  @@index([listNumber])
+}
+
+/// Logopedik markaz o‘quvchisi (bola)
+model Student {
+  id        String    @id @default(cuid())
+  fullName  String
+  /// Tug‘ilgan sana
+  dateOfBirth DateTime? @db.Date
+  gender    String?
+  /// Ota-ona yoki vasiy
+  guardianName  String?
+  guardianPhone String?
+  notes         String?   @db.Text
+  /// Mashg‘ulot / ehtiyoj yo‘nalishlari
+  focusAreas String[] @default([])
+  isActive   Boolean  @default(true)
+
+  primaryTeacherId String?
+  primaryTeacher   Teacher? @relation(fields: [primaryTeacherId], references: [id], onDelete: SetNull)
+
+  lessons Lesson[]
+  payments Payment[]
+  debts StudentDebt[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([fullName])
+  @@index([primaryTeacherId])
+}
+
+/// O‘quvchi to‘lovi (markaz hisobi)
+model Payment {
+  id     String  @id @default(cuid())
+  /// Kunlik: bola to‘lovi. Abonentlik: jami abonent summasi (so‘m)
+  amountSom Int
+  kind      PaymentKind @default(DAILY)
+  /// To‘lov sanasi
+  paidAt    DateTime @db.Date
+  method    PaymentMethod @default(CASH)
+  /// Qisqa maqsad (masalan: oy to‘lovi, dars paketi)
+  description String? @db.Text
+  notes       String?  @db.Text
+
+  /// Ushbu to‘lov bo‘yicha ulush oladigan o‘qituvchi
+  teacherId String?
+  teacher   Teacher? @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+  /// Kunlik: o‘qituvchiga beriladigan summa. Abonentlik: jami o‘qituvchi ulushi (darslar × dars narxi)
+  teacherShareSom Int?
+
+  /// Abonentlik: nechta dars uchun to‘langan
+  subscriptionLessonCount Int?
+  /// Abonentlik: har bir dars uchun o‘qituvchi ulushi (so‘m)
+  teacherSharePerLessonSom Int?
+  /// Abonentlik: ushbu paketdan qancha dars qolgan (kelgan darsda kamayadi)
+  subscriptionLessonsRemaining Int?
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  /// Bir martalik dars to‘lovi bog‘lanishi (ixtiyoriy)
+  lessonId String? @unique
+  lesson   Lesson? @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+
+  lessonsConsumedSubscriptionFrom Lesson[] @relation("SubscriptionConsumedFrom")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([studentId])
+  @@index([paidAt])
+  @@index([teacherId])
+}
+
+/// Belgilangan kunda o‘qituvchi–o‘quvchi darsi yoki konsultatsiya (markaz vaqti 08:00–18:00)
+model Lesson {
+  id           String   @id @default(cuid())
+  kind         LessonKind @default(LESSON)
+  /// Dars kuni (faqat sana)
+  lessonDate   DateTime @db.Date
+  /// Kun boshidan daqiqalar (masalan 09:00 → 540)
+  startMinutes Int
+  endMinutes   Int
+  teacherId    String
+  studentId    String
+  notes        String?  @db.Text
+
+  /// Bir martalik dars: keldi / kelmadi va to‘lov holati
+  attendance          LessonAttendance @default(UNMARKED)
+  guardianFee         LessonGuardianFee @default(NA)
+  /// Kelgan holda: o‘qituvchi ulushi / dars summasi (so‘m)
+  settlementSom       Int?
+  attendanceMarkedAt  DateTime?
+
+  /// Abonentlikdan ushbu dars uchun yechildi (kelganda paket ID)
+  consumedSubscriptionPaymentId String?
+  consumedSubscriptionPayment     Payment? @relation("SubscriptionConsumedFrom", fields: [consumedSubscriptionPaymentId], references: [id], onDelete: SetNull)
+
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  payment        Payment?
+  studentDebt    StudentDebt?
+  teacherEarning TeacherLessonEarning?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([lessonDate, teacherId])
+  @@index([lessonDate, studentId])
+  @@index([lessonDate, kind])
+}
+
+/// O‘quvchi qarzi (masalan: keldi, lekin to‘lamagan)
+model StudentDebt {
+  id        String @id @default(cuid())
+  amountSom Int
+  note      String? @db.Text
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  lessonId String @unique
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([studentId])
+}
+
+/// Markazning qo‘shimcha xarajatlari (admin ish vaqtida kiritiladi)
+model OperationalExpense {
+  id        String   @id @default(cuid())
+  /// Sarflangan summa (so‘m)
+  amountSom Int
+  /// Xarajat sanasi
+  spentAt   DateTime @db.Date
+  /// Qisqa nom (masalan: kanstovar, transport)
+  title     String
+  /// Kategoriya — ixtiyoriy yorliq
+  category  String?
+  /// Batafsil izoh
+  notes     String?  @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([spentAt])
+}
+
+/// O‘qituvchiga dars bo‘yicha yozilgan daromad
+model TeacherLessonEarning {
+  id        String @id @default(cuid())
+  amountSom Int
+  payer     TeacherEarningPayer
+
+  lessonId String @unique
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  teacherId String
+  teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([teacherId])
+}
