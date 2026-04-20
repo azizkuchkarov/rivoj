@@ -16,6 +16,7 @@ function numFromForm(v: unknown): number | undefined {
 export const paymentFormSchema = z
   .object({
     studentId: z.string().min(1, "O‘quvchini tanlang"),
+    teacherId: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
     kind: z.nativeEnum(PaymentKind),
     amountSom: z.coerce.number().int().min(1000, "Summa kamida 1000 so‘m").max(999_999_999, "Summa juda katta"),
     paidAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Sana noto‘g‘ri"),
@@ -32,6 +33,13 @@ export const paymentFormSchema = z
   })
   .superRefine((data, ctx) => {
     if (data.kind === PaymentKind.DAILY) {
+      if (!data.teacherId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "O‘qituvchini tanlang",
+          path: ["teacherId"],
+        });
+      }
       if (data.teacherShareSom === undefined) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,

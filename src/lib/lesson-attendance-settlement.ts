@@ -3,20 +3,14 @@ import type { Prisma } from "@/generated/prisma/client";
 
 type Tx = Pick<Prisma.TransactionClient, "payment">;
 
-/**
- * «Yangi dars» kunlik to‘lovida tavsif: «Dars jadvali — N ta vaqt» → ulush N ta slotga bo‘linadi.
- */
-export function perLessonFromDailyPlannerPayment(teacherShareSom: number, description: string | null): number {
-  const m = (description ?? "").match(/—\s*(\d+)\s*ta\s*vaqt/);
-  const n = m ? Math.max(1, Number.parseInt(m[1], 10)) : 1;
-  return Math.max(0, Math.floor(teacherShareSom / n));
+/** Bir martalik to‘lov: kiritilgan o‘qituvchi ulushi har bir dars uchun alohida qo‘llanadi. */
+export function perLessonFromDailyPlannerPayment(teacherShareSom: number): number {
+  return Math.max(0, teacherShareSom);
 }
 
-/** Kunlik to‘lov: o‘quvchi tomonidan bir dars uchun (slot) markazga to‘lanishi kerak bo‘lgan summa */
-export function perLessonGuardianFromDailyPlannerPayment(amountSom: number, description: string | null): number {
-  const m = (description ?? "").match(/—\s*(\d+)\s*ta\s*vaqt/);
-  const n = m ? Math.max(1, Number.parseInt(m[1], 10)) : 1;
-  return Math.max(0, Math.floor(amountSom / n));
+/** Bir martalik to‘lov: kiritilgan o‘quvchi summasi har bir dars uchun alohida qo‘llanadi. */
+export function perLessonGuardianFromDailyPlannerPayment(amountSom: number): number {
+  return Math.max(0, amountSom);
 }
 
 function perLessonGuardianFromSubscription(amountSom: number, subscriptionLessonCount: number | null): number {
@@ -105,15 +99,12 @@ export async function resolveLessonSettlementSom(
       teacherShareSom: { gt: 0 },
     },
     orderBy: [{ paidAt: "desc" }, { createdAt: "desc" }],
-    select: { amountSom: true, teacherShareSom: true, description: true },
+    select: { amountSom: true, teacherShareSom: true },
   });
 
   if (daily) {
-    const earningAmount = perLessonFromDailyPlannerPayment(daily.teacherShareSom ?? 0, daily.description);
-    const guardianDebtAmountSom = perLessonGuardianFromDailyPlannerPayment(
-      daily.amountSom ?? 0,
-      daily.description,
-    );
+    const earningAmount = perLessonFromDailyPlannerPayment(daily.teacherShareSom ?? 0);
+    const guardianDebtAmountSom = perLessonGuardianFromDailyPlannerPayment(daily.amountSom ?? 0);
     return {
       earningAmount,
       guardianDebtAmountSom: guardianDebtAmountSom > 0 ? guardianDebtAmountSom : earningAmount,

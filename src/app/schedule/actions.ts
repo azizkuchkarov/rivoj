@@ -8,6 +8,7 @@ import { z } from "zod";
 import { LessonKind, PaymentKind } from "@/generated/prisma/enums";
 import { bookLesson, bookLessonsBatchWithDb } from "@/lib/lesson-booking";
 import { prisma } from "@/lib/prisma";
+import { sendTelegramTextByPhone } from "@/lib/telegram";
 import { paymentFormSchema } from "@/lib/validations/payment";
 import { SCHEDULE_CONSULTATION_PATH, SCHEDULE_LESSON_PATH, normalizeScheduleReturnBase } from "@/lib/schedule-paths";
 import { addDaysUTC, parseWeekMondayParam, startOfWeekMondayUTC, toISODateStringUTC } from "@/lib/week-utils";
@@ -34,6 +35,14 @@ export type PlannerLessonCell = {
   teacherShort: string;
   kind: LessonKind;
 };
+
+function formatClock(startMinutes: number): string {
+  const h = Math.floor(startMinutes / 60)
+    .toString()
+    .padStart(2, "0");
+  const m = (startMinutes % 60).toString().padStart(2, "0");
+  return `${h}:${m}`;
+}
 
 /** Yangi dars rejalashtiruvchi: tanlangan haftada o‘qituvchi yoki o‘quvchiga tegishli barcha bandliklar */
 export async function getLessonPlannerData(
@@ -130,75 +139,62 @@ export async function createLessonBatch(
   }
 
   const { slots, notes: lessonNotes } = parsed.data;
+  const reuseSubscription = String(formData.get("reuseSubscription") ?? "0") === "1";
 
-  const payParsed = paymentFormSchema.safeParse({
-    studentId,
-    kind: String(formData.get("paymentKind") ?? PaymentKind.DAILY),
-    amountSom: String(formData.get("paymentAmountSom") ?? ""),
-    paidAt: String(formData.get("paymentPaidAt") ?? ""),
-    method: String(formData.get("paymentMethod") ?? "CASH"),
-    description: String(formData.get("paymentDescription") ?? "").trim() || undefined,
-    notes: String(formData.get("paymentNotes") ?? "").trim() || undefined,
-    teacherShareSom: String(formData.get("paymentTeacherShareSom") ?? ""),
-    subscriptionLessonCount: String(formData.get("paymentSubscriptionLessonCount") ?? ""),
-    teacherSharePerLessonSom: String(formData.get("paymentTeacherSharePerLessonSom") ?? ""),
-    redirectAfter: "payments",
-  });
+  let pay: ReturnType<typeof paymentFormSchema.parse> | null = null;
+  if (!reuseSubscription) {
+    const payParsed = paymentFormSchema.safeParse({
+      studentId,
+      teacherId,
+      kind: String(formData.get("paymentKind") ?? PaymentKind.DAILY),
+      amountSom: String(formData.get("paymentAmountSom") ?? ""),
+      paidAt: String(formData.get("paymentPaidAt") ?? ""),
+      method: String(formData.get("paymentMethod") ?? "CASH"),
+      description: String(formData.get("paymentDescription") ?? "").trim() || undefined,
+      notes: String(formData.get("paymentNotes") ?? "").trim() || undefined,
+      teacherShareSom: String(formData.get("paymentTeacherShareSom") ?? ""),
+      subscriptionLessonCount: String(formData.get("paymentSubscriptionLessonCount") ?? ""),
+      teacherSharePerLessonSom: String(formData.get("paymentTeacherSharePerLessonSom") ?? ""),
+      redirectAfter: "payments",
+    });
 
-  if (!payParsed.success) {
-    const first = payParsed.error.issues[0];
-    return { error: first?.message ?? "To‘lov ma’lumotlarini tekshiring." };
-  }
+    if (!payParsed.success) {
+      const first = payParsed.error.issues[0];
+      return { error: first?.message ?? "To‘lov ma’lumotlarini tekshiring." };
+    }
 
-  const pay = payParsed.data;
+    pay = payParsed.data;
 
-  if (pay.kind === PaymentKind.SUBSCRIPTION) {
-    const n = pay.subscriptionLessonCount!;
-    if (slots.length !== n) {
-      return {
-        error: `Abonentlik: ${n} ta dars uchun to‘lov kiritilgan — jadvalda ham aynan ${n} ta vaqt tanlang (hozir ${slots.length} ta). Bir nechta haftada tanlash mumkin; hafta o‘zgartirganda tanlovlar saqlanadi.`,
-      };
+    if (pay.kind === PaymentKind.SUBSCRIPTION) {
+      const n = pay.subscriptionLessonCount!;
+      if (slots.length !== n) {
+        return {
+          error: `Abonentlik: ${n} ta dars uchun to‘lov kiritilgan — jadvalda ham aynan ${n} ta vaqt tanlang (hozir ${slots.length} ta). Bir nechta haftada tanlash mumkin; hafta o‘zgartirganda tanlovlar saqlanadi.`,
+        };
+      }
     }
   }
 
   try {
+    let createdLessonIds: string[] = [];
     await prisma.$transaction(async (tx) => {
       let teacherShareSom: number | null = null;
       let subscriptionLessonCount: number | null = null;
       let teacherSharePerLessonSom: number | null = null;
       let subscriptionLessonsRemaining: number | null = null;
 
-      if (pay.kind === PaymentKind.DAILY) {
-        teacherShareSom = pay.teacherShareSom ?? 0;
-      } else {
-        subscriptionLessonCount = pay.subscriptionLessonCount!;
-        teacherSharePerLessonSom = pay.teacherSharePerLessonSom!;
-        teacherShareSom = subscriptionLessonCount * teacherSharePerLessonSom;
-        subscriptionLessonsRemaining = subscriptionLessonCount;
+      if (pay) {
+        if (pay.kind === PaymentKind.DAILY) {
+          teacherShareSom = pay.teacherShareSom ?? 0;
+        } else {
+          subscriptionLessonCount = pay.subscriptionLessonCount!;
+          teacherSharePerLessonSom = pay.teacherSharePerLessonSom!;
+          teacherShareSom = subscriptionLessonCount * teacherSharePerLessonSom;
+          subscriptionLessonsRemaining = subscriptionLessonCount;
+        }
       }
 
-      const descDefault =
-        pay.description ??
-        (lessonNotes
-          ? `Dars jadvali: ${lessonNotes}`
-          : `Dars jadvali — ${slots.length} ta vaqt`);
-
-      await tx.payment.create({
-        data: {
-          studentId: pay.studentId,
-          kind: pay.kind,
-          amountSom: pay.amountSom,
-          paidAt: new Date(`${pay.paidAt}T12:00:00.000Z`),
-          method: pay.method,
-          description: descDefault,
-          notes: pay.notes,
-          teacherId,
-          teacherShareSom,
-          subscriptionLessonCount,
-          teacherSharePerLessonSom,
-          subscriptionLessonsRemaining,
-        },
-      });
+      const descDefault = pay?.description ?? (lessonNotes ? `Dars jadvali: ${lessonNotes}` : `Dars jadvali — ${slots.length} ta vaqt`);
 
       const batch = await bookLessonsBatchWithDb(tx, {
         kind: LessonKind.LESSON,
@@ -210,7 +206,72 @@ export async function createLessonBatch(
       if (!batch.ok) {
         throw new Error(`BATCH:${batch.error}`);
       }
+      createdLessonIds = batch.createdLessons.map((L) => L.id);
+
+      if (pay?.kind === PaymentKind.DAILY) {
+        await Promise.all(
+          batch.createdLessons.map((L) =>
+            tx.payment.create({
+              data: {
+                studentId: pay.studentId,
+                lessonId: L.id,
+                kind: pay.kind,
+                amountSom: pay.amountSom,
+                paidAt: new Date(`${pay.paidAt}T12:00:00.000Z`),
+                method: pay.method,
+                description: descDefault,
+                notes: pay.notes,
+                teacherId,
+                teacherShareSom,
+                subscriptionLessonCount: null,
+                teacherSharePerLessonSom: null,
+                subscriptionLessonsRemaining: null,
+              },
+            }),
+          ),
+        );
+      } else if (pay?.kind === PaymentKind.SUBSCRIPTION) {
+        await tx.payment.create({
+          data: {
+            studentId: pay.studentId,
+            kind: pay.kind,
+            amountSom: pay.amountSom,
+            paidAt: new Date(`${pay.paidAt}T12:00:00.000Z`),
+            method: pay.method,
+            description: descDefault,
+            notes: pay.notes,
+            teacherId,
+            teacherShareSom,
+            subscriptionLessonCount,
+            teacherSharePerLessonSom,
+            subscriptionLessonsRemaining,
+          },
+        });
+      }
     });
+
+    if (createdLessonIds.length > 0) {
+      const createdLessons = await prisma.lesson.findMany({
+        where: { id: { in: createdLessonIds } },
+        include: {
+          student: { select: { fullName: true, guardianPhone: true } },
+          teacher: { select: { fullName: true } },
+        },
+        orderBy: [{ lessonDate: "asc" }, { startMinutes: "asc" }],
+      });
+      if (createdLessons.length > 0) {
+        const first = createdLessons[0]!;
+        const dateAndTimes = createdLessons
+          .map((L) => `${L.lessonDate.toISOString().slice(0, 10)} ${formatClock(L.startMinutes)}`)
+          .join(", ");
+        const text =
+          `Farzandingizga dars belgilandi.\n` +
+          `O‘quvchi: ${first.student.fullName}\n` +
+          `O‘qituvchi: ${first.teacher.fullName}\n` +
+          `Vaqt(lar): ${dateAndTimes}`;
+        await sendTelegramTextByPhone(first.student.guardianPhone, text);
+      }
+    }
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Saqlashda xatolik.";
     if (msg.startsWith("BATCH:")) {
@@ -271,6 +332,34 @@ export async function createLesson(
   if (!result.ok) {
     return { error: result.error };
   }
+
+  try {
+    const createdLesson = await prisma.lesson.findFirst({
+      where: {
+        kind,
+        lessonDate: new Date(`${data.lessonDate}T00:00:00.000Z`),
+        startMinutes: data.startMinutes,
+        teacherId: data.teacherId,
+        studentId: data.studentId,
+      },
+      include: {
+        student: { select: { fullName: true, guardianPhone: true } },
+        teacher: { select: { fullName: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    if (createdLesson) {
+      const text =
+        `Farzandingizga dars belgilandi.\n` +
+        `O‘quvchi: ${createdLesson.student.fullName}\n` +
+        `O‘qituvchi: ${createdLesson.teacher.fullName}\n` +
+        `Vaqt: ${data.lessonDate} ${formatClock(createdLesson.startMinutes)}`;
+      await sendTelegramTextByPhone(createdLesson.student.guardianPhone, text);
+    }
+  } catch {
+    // Telegram yuborish xatosi dars saqlanishini to‘xtatmaydi
+  }
+
   revalidatePath(SCHEDULE_LESSON_PATH);
   revalidatePath(SCHEDULE_CONSULTATION_PATH);
   const monday = startOfWeekMondayUTC(new Date(`${data.lessonDate}T12:00:00.000Z`));

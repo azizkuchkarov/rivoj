@@ -15,6 +15,7 @@ export type PaymentActionState = {
 function formDataToObject(formData: FormData) {
   return {
     studentId: String(formData.get("studentId") ?? ""),
+    teacherId: String(formData.get("teacherId") ?? ""),
     kind: String(formData.get("kind") ?? PaymentKind.DAILY),
     amountSom: String(formData.get("amountSom") ?? ""),
     paidAt: String(formData.get("paidAt") ?? ""),
@@ -47,6 +48,15 @@ export async function createPayment(
   if (!student) {
     return { error: "O‘quvchi topilmadi." };
   }
+  if (data.kind === PaymentKind.DAILY) {
+    const teacher = await prisma.teacher.findFirst({
+      where: { id: data.teacherId, isActive: true },
+      select: { id: true },
+    });
+    if (!teacher) {
+      return { error: "Tanlangan o‘qituvchi topilmadi yoki faol emas." };
+    }
+  }
 
   let teacherShareSom: number | null = null;
   let subscriptionLessonCount: number | null = null;
@@ -72,7 +82,7 @@ export async function createPayment(
         method: data.method,
         description: data.description,
         notes: data.notes,
-        teacherId: null,
+        teacherId: data.kind === PaymentKind.DAILY ? data.teacherId! : null,
         teacherShareSom,
         subscriptionLessonCount,
         teacherSharePerLessonSom,

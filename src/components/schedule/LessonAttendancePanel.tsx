@@ -9,7 +9,6 @@ import { markLessonAttendance, type LessonAttendanceActionState } from "@/app/sc
 import type { LessonWithRelations } from "@/components/schedule/schedule-types";
 import { LessonAttendance, LessonGuardianFee } from "@/generated/prisma/enums";
 import { cn } from "@/lib/cn";
-import { formatSomUZS } from "@/lib/format-currency";
 import { formatLessonDateHeadingUzUtc } from "@/lib/schedule-date-format";
 
 function attendanceLabel(lesson: LessonWithRelations): string {
@@ -41,9 +40,13 @@ export function LessonAttendanceDialog({ lesson, onClose }: LessonAttendanceDial
   useEffect(() => {
     if (state?.success) {
       onClose();
-      router.refresh();
+      if (state.rescheduleUrl) {
+        router.push(state.rescheduleUrl);
+      } else {
+        router.refresh();
+      }
     }
-  }, [state?.success, onClose, router]);
+  }, [state?.success, state?.rescheduleUrl, onClose, router]);
 
   const showFee = attendance === LessonAttendance.PRESENT;
   const dateLabel = formatLessonDateHeadingUzUtc(lesson.lessonDate);
@@ -188,12 +191,6 @@ export function LessonAttendanceDialog({ lesson, onClose }: LessonAttendanceDial
           </div>
         </form>
 
-        <p className="mt-4 text-xs text-[var(--muted)]">
-          Hozirgi holat: <span className="font-medium text-[var(--ink)]">{attendanceLabel(lesson)}</span>
-          {lesson.settlementSom != null ? (
-            <span className="ml-2 tabular-nums">({formatSomUZS(lesson.settlementSom)} so‘m)</span>
-          ) : null}
-        </p>
       </div>
     </div>
   );
@@ -202,11 +199,14 @@ export function LessonAttendanceDialog({ lesson, onClose }: LessonAttendanceDial
 export function LessonAttendanceTrigger({
   lesson,
   compact,
+  label,
 }: {
   lesson: LessonWithRelations;
   compact?: boolean;
+  label?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const isLabelMode = Boolean(label);
 
   return (
     <>
@@ -215,15 +215,17 @@ export function LessonAttendanceTrigger({
         onClick={() => setOpen(true)}
         className={cn(
           "inline-flex items-center justify-center gap-1 rounded font-semibold text-teal-800 ring-1 ring-teal-200/90 hover:bg-teal-50",
-          compact
-            ? "w-auto px-2 py-1 text-[10px]"
-            : "mt-1 w-full bg-white/90 px-1 py-0.5 text-[9px]",
+          isLabelMode
+            ? "w-full px-2 py-1.5 text-[11px]"
+            : compact
+              ? "w-auto px-2 py-1 text-[10px]"
+              : "mt-1 w-full bg-white/90 px-1 py-0.5 text-[9px]",
         )}
       >
-        <UserCheck className={cn("shrink-0", compact ? "h-3 w-3" : "h-2.5 w-2.5")} aria-hidden />
-        Keldi / to‘lov
+        {!isLabelMode ? <UserCheck className={cn("shrink-0", compact ? "h-3 w-3" : "h-2.5 w-2.5")} aria-hidden /> : null}
+        {label ?? "Keldi / to‘lov"}
       </button>
-      {!compact ? (
+      {!compact && !isLabelMode ? (
         <p className="mt-0.5 text-center text-[8px] leading-tight text-zinc-500">{attendanceLabel(lesson)}</p>
       ) : null}
       {open ? <LessonAttendanceDialog lesson={lesson} onClose={() => setOpen(false)} /> : null}

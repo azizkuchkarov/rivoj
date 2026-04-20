@@ -22,6 +22,16 @@ export function TeacherPaymentsSection({
   totalTeacherShareSom,
   lessonEarningsSom = 0,
 }: TeacherPaymentsSectionProps) {
+  const dailyTotals = new Map<string, number>();
+  for (const p of payments) {
+    const dayKey = p.paidAt.toISOString().slice(0, 10);
+    const prev = dailyTotals.get(dayKey) ?? 0;
+    dailyTotals.set(dayKey, prev + (p.teacherShareSom ?? 0));
+  }
+  const dailyTotalRows = [...dailyTotals.entries()]
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([dateIso, amountSom]) => ({ dateIso, amountSom }));
+
   return (
     <section className="rounded-3xl border border-white/60 bg-[color:var(--surface)] p-6 shadow-lg shadow-black/5 md:p-8">
       <div className="space-y-1">
@@ -43,6 +53,41 @@ export function TeacherPaymentsSection({
             <span className="font-semibold tabular-nums text-teal-900">{formatSomUZS(lessonEarningsSom)} so‘m</span>
           </p>
         ) : null}
+      </div>
+
+      <div className="mt-5 rounded-2xl border border-zinc-100/90 bg-white/50 p-4">
+        <h3 className="text-sm font-semibold text-[var(--ink)]">Har kunlik umumiy summa</h3>
+        {dailyTotalRows.length === 0 ? (
+          <p className="mt-2 text-sm text-[var(--muted)]">Hozircha kunlik umumiy yozuv yo‘q.</p>
+        ) : (
+          <div className="mt-3 overflow-x-auto rounded-xl border border-zinc-100">
+            <table className="w-full min-w-[360px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-zinc-200 bg-zinc-50/70">
+                  <th className="px-3 py-2.5 font-semibold text-zinc-700">Sana</th>
+                  <th className="px-3 py-2.5 font-semibold text-zinc-700">Kunlik jami ulush</th>
+                </tr>
+              </thead>
+              <tbody>
+                {dailyTotalRows.map((r) => {
+                  const dateLabel = new Intl.DateTimeFormat("uz-UZ", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  }).format(new Date(`${r.dateIso}T12:00:00.000Z`));
+                  return (
+                    <tr key={r.dateIso} className="border-b border-zinc-100/90 last:border-0">
+                      <td className="px-3 py-2.5 text-[var(--ink-soft)]">{dateLabel}</td>
+                      <td className="px-3 py-2.5 font-semibold tabular-nums text-teal-900">
+                        {formatSomUZS(r.amountSom)} so‘m
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {payments.length === 0 ? (

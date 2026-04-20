@@ -41,6 +41,8 @@ type LessonPlannerFormProps = {
   initialWeekMondayIso?: string;
   /** Oldindan belgilangan slot(lar) */
   initialSlots?: { lessonDate: string; startMinutes: number }[];
+  /** true bo‘lsa, mavjud abonentlikdan foydalanib to‘lovsiz qayta biriktirish */
+  reuseSubscription?: boolean;
 };
 
 function slotKey(dayIso: string, startM: number) {
@@ -59,6 +61,7 @@ export function LessonPlannerForm({
   initialStudentId = "",
   initialWeekMondayIso,
   initialSlots = [],
+  reuseSubscription = false,
 }: LessonPlannerFormProps) {
   const activeTeachers = teachers.filter((t) => t.isActive);
   const activeStudents = students.filter((s) => s.isActive);
@@ -77,7 +80,7 @@ export function LessonPlannerForm({
   const [weekMondayIso, setWeekMondayIso] = useState(defaultMonday);
 
   const defaultPaidAt = useMemo(() => new Date().toISOString().slice(0, 10), []);
-  const [scheduleUnlocked, setScheduleUnlocked] = useState(false);
+  const [scheduleUnlocked, setScheduleUnlocked] = useState(reuseSubscription);
   const [paymentGateError, setPaymentGateError] = useState<string | null>(null);
 
   const [payKind, setPayKind] = useState<PaymentKind>(PaymentKind.DAILY);
@@ -128,9 +131,9 @@ export function LessonPlannerForm({
   };
 
   useEffect(() => {
-    setScheduleUnlocked(false);
+    setScheduleUnlocked(reuseSubscription);
     setPaymentGateError(null);
-  }, [teacherId, studentId]);
+  }, [teacherId, studentId, reuseSubscription]);
 
   useEffect(() => {
     if (!teacherId || !studentId) {
@@ -189,6 +192,10 @@ export function LessonPlannerForm({
     if (st.kind !== "free") return;
     const k = slotKey(dayIso, startM);
     setSelected((prev) => {
+      if (reuseSubscription) {
+        if (prev.has(k)) return new Set();
+        return new Set([k]);
+      }
       const n = new Set(prev);
       if (n.has(k)) n.delete(k);
       else n.add(k);
@@ -206,8 +213,8 @@ export function LessonPlannerForm({
 
   const weekLabel = useMemo(() => formatPlannerWeekBandUtc(parseWeekMondayParam(weekMondayIso)), [weekMondayIso]);
 
-  const showPaymentBlock = Boolean(teacherId && studentId);
-  const showGrid = Boolean(teacherId && studentId && scheduleUnlocked);
+  const showPaymentBlock = Boolean(teacherId && studentId && !reuseSubscription);
+  const showGrid = Boolean(teacherId && studentId && (scheduleUnlocked || reuseSubscription));
 
   const tryContinueToSchedule = () => {
     setPaymentGateError(null);
@@ -323,7 +330,9 @@ export function LessonPlannerForm({
                 onChange={(e) => setPayKind(e.target.value as PaymentKind)}
                 className={plannerFieldClass()}
               >
-                <option value={PaymentKind.DAILY}>Bir martalik (o‘quvchi + o‘qituvchi ulushi)</option>
+                <option value={PaymentKind.DAILY}>
+                  Bir martalik (har bir dars uchun alohida: o‘quvchi to‘lovi + o‘qituvchi ulushi)
+                </option>
                 <option value={PaymentKind.SUBSCRIPTION}>
                   Abonentlik (jami summa, darslar soni, har bir dars uchun o‘qituvchi ulushi)
                 </option>
@@ -396,6 +405,9 @@ export function LessonPlannerForm({
                   className={plannerFieldClass()}
                   placeholder="50000"
                 />
+                <p className="mt-1 text-xs text-[var(--muted)]">
+                  Kiritilgan summa har bir tanlangan dars uchun qo‘llanadi.
+                </p>
               </div>
             ) : (
               <>
@@ -484,6 +496,13 @@ export function LessonPlannerForm({
             <span className="text-sm text-[var(--muted)]">To‘lov ma’lumotlari keyin tasdiqlashda saqlanadi.</span>
           </div>
         </section>
+      ) : null}
+
+      {reuseSubscription && teacherId && studentId ? (
+        <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 px-4 py-3 text-sm text-emerald-950">
+          Mavjud abonentlik bo‘yicha qayta biriktirish rejimi: bu yerda yangi to‘lov yaratilmaydi. Har bir kelmagan
+          dars uchun aynan 1 ta yangi vaqt tanlang.
+        </div>
       ) : null}
 
       {showGrid ? (
@@ -681,6 +700,7 @@ export function LessonPlannerForm({
             <input type="hidden" name="paymentTeacherShareSom" value={payKind === PaymentKind.DAILY ? payTeacherShareSom : ""} />
             <input type="hidden" name="paymentSubscriptionLessonCount" value={payKind === PaymentKind.SUBSCRIPTION ? paySubLessons : ""} />
             <input type="hidden" name="paymentTeacherSharePerLessonSom" value={payKind === PaymentKind.SUBSCRIPTION ? paySubPerLesson : ""} />
+            <input type="hidden" name="reuseSubscription" value={reuseSubscription ? "1" : "0"} />
 
             <div>
               <label className="mb-2 block text-sm font-medium text-[var(--ink-soft)]" htmlFor="planner-notes">
@@ -701,6 +721,7 @@ export function LessonPlannerForm({
                 disabled={
                   pending ||
                   slotsPayload.length === 0 ||
+                  (reuseSubscription && slotsPayload.length !== 1) ||
                   (payKind === PaymentKind.SUBSCRIPTION &&
                     subscriptionPackSize != null &&
                     slotsPayload.length !== subscriptionPackSize)
@@ -712,6 +733,10 @@ export function LessonPlannerForm({
               </button>
               {slotsPayload.length === 0 ? (
                 <span className="text-sm text-[var(--muted)]">Kamida bitta bo‘sh slot tanlang.</span>
+              ) : reuseSubscription && slotsPayload.length !== 1 ? (
+                <span className="text-sm text-emerald-900">
+                  Qayta biriktirishda faqat bitta slot tanlanadi (hozir {slotsPayload.length} ta).
+                </span>
               ) : payKind === PaymentKind.SUBSCRIPTION &&
                 subscriptionPackSize != null &&
                 slotsPayload.length !== subscriptionPackSize ? (

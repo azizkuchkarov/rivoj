@@ -1,12 +1,11 @@
 import Link from "next/link";
 
-import { ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import { deleteLesson } from "@/app/schedule/actions";
 import { LessonAttendanceTrigger } from "@/components/schedule/LessonAttendancePanel";
 import type { LessonWithRelations } from "@/components/schedule/schedule-types";
 import { ScheduleViewSwitcher } from "@/components/schedule/ScheduleViewSwitcher";
-import { LessonKind } from "@/generated/prisma/enums";
+import { LessonAttendance, LessonGuardianFee, LessonKind } from "@/generated/prisma/enums";
 import type { Teacher } from "@/generated/prisma/client";
 import { cn } from "@/lib/cn";
 import { SCHEDULE_CONSULTATION_PATH, SCHEDULE_LESSON_PATH } from "@/lib/schedule-paths";
@@ -32,6 +31,25 @@ function buildLookup(lessons: LessonWithRelations[]) {
     m.set(lessonKey(L.teacherId, L.startMinutes), L);
   }
   return m;
+}
+
+function dayLessonStatusStyle(L: LessonWithRelations) {
+  if (L.attendance === LessonAttendance.PRESENT && L.guardianFee === LessonGuardianFee.PAID) {
+    return {
+      card: "border-emerald-300/90 bg-emerald-50/95",
+      badge: "bg-emerald-200 text-emerald-950",
+    };
+  }
+  if (L.attendance === LessonAttendance.PRESENT && L.guardianFee === LessonGuardianFee.UNPAID) {
+    return {
+      card: "border-red-300/90 bg-red-50/95",
+      badge: "bg-red-200 text-red-950",
+    };
+  }
+  return {
+    card: "border-amber-300/90 bg-amber-50/95",
+    badge: "bg-amber-200 text-amber-950",
+  };
 }
 
 export function ScheduleDayMatrixView({
@@ -67,7 +85,7 @@ export function ScheduleDayMatrixView({
             O‘qituvchilar (qatorlar) · dars va konsultatsiya alohida belgilanadi · soatlar (ustunlar) · {title}
           </p>
         </div>
-        <div className="flex w-full min-w-0 flex-nowrap items-center justify-end gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5">
+        <div className="flex w-full min-w-0 flex-nowrap items-center justify-start gap-2 overflow-x-auto pb-0.5 lg:justify-end [-ms-overflow-style:none] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5">
           <ScheduleViewSwitcher
             active="day"
             weekMondayIso={weekMondayIso}
@@ -146,43 +164,17 @@ export function ScheduleDayMatrixView({
                   {slots.map((slotStart) => {
                     const L = lookup.get(lessonKey(t.id, slotStart));
                     const isCon = L && L.kind === LessonKind.CONSULTATION;
+                    const st = L ? dayLessonStatusStyle(L) : null;
                     return (
                       <td key={slotStart} className="min-h-[52px] border-l border-zinc-100/80 px-1 py-1 align-top">
                         {L ? (
                           <div
                             className={cn(
                               "rounded-lg border px-1.5 py-1 text-[10px] leading-snug shadow-sm",
-                              isCon
-                                ? "border-violet-300/90 bg-violet-50/95"
-                                : "border-amber-200/90 bg-amber-50/95",
+                              isCon ? "border-violet-300/90 bg-violet-50/95" : st?.card,
                             )}
                           >
-                            <div className="mb-0.5">
-                              <span
-                                className={cn(
-                                  "inline-block rounded px-1 text-[8px] font-bold uppercase tracking-wide",
-                                  isCon ? "bg-violet-200 text-violet-950" : "bg-amber-200 text-amber-950",
-                                )}
-                              >
-                                {isCon ? "Konsultatsiya" : "Dars"}
-                              </span>
-                            </div>
-                            <div className="font-semibold text-[var(--ink)]">{L.student.fullName}</div>
-                            <LessonAttendanceTrigger lesson={L} />
-                            <form action={deleteLesson} className="mt-1">
-                              <input type="hidden" name="lessonId" value={L.id} />
-                              <input type="hidden" name="scheduleView" value="day" />
-                              <input type="hidden" name="date" value={dayIso} />
-                              <input type="hidden" name="returnBase" value={basePath} />
-                              <button
-                                type="submit"
-                                className="inline-flex w-full items-center justify-center gap-0.5 rounded bg-white/90 px-1 py-0.5 text-[9px] font-medium text-red-700 ring-1 ring-red-200/80 hover:bg-red-50"
-                                aria-label={isCon ? "Konsultatsiyani o‘chirish" : "Darsni o‘chirish"}
-                              >
-                                <Trash2 className="h-2.5 w-2.5" aria-hidden />
-                                O‘chirish
-                              </button>
-                            </form>
+                            <LessonAttendanceTrigger lesson={L} label={L.student.fullName} />
                           </div>
                         ) : isConsultation ? (
                           <span className="flex min-h-[36px] items-center justify-center text-[10px] text-zinc-300">

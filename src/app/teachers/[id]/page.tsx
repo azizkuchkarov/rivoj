@@ -15,30 +15,37 @@ export default async function TeacherDetailPage({ params }: PageProps) {
   const { id } = await params;
 
   let teacher;
-  let teacherPayments;
-  let totalTeacherShareSom = 0;
-  let lessonEarningsSom = 0;
+  let lessonEarningRows: {
+    lessonId: string;
+    lessonDateIso: string;
+    amountSom: number;
+    student: { id: string; fullName: string };
+  }[] = [];
   try {
-    const [t, payList, shareAgg, earnAgg] = await Promise.all([
+    const [t, earningList] = await Promise.all([
       prisma.teacher.findUnique({ where: { id } }),
-      prisma.payment.findMany({
+      prisma.teacherLessonEarning.findMany({
         where: { teacherId: id },
-        include: { student: { select: { id: true, fullName: true } } },
-        orderBy: [{ paidAt: "desc" }, { createdAt: "desc" }],
-      }),
-      prisma.payment.aggregate({
-        where: { teacherId: id },
-        _sum: { teacherShareSom: true },
-      }),
-      prisma.teacherLessonEarning.aggregate({
-        where: { teacherId: id },
-        _sum: { amountSom: true },
+        select: {
+          lessonId: true,
+          amountSom: true,
+          lesson: {
+            select: {
+              lessonDate: true,
+              student: { select: { id: true, fullName: true } },
+            },
+          },
+        },
+        orderBy: [{ lesson: { lessonDate: "desc" } }, { createdAt: "desc" }],
       }),
     ]);
     teacher = t;
-    teacherPayments = payList;
-    totalTeacherShareSom = shareAgg._sum.teacherShareSom ?? 0;
-    lessonEarningsSom = earnAgg._sum.amountSom ?? 0;
+    lessonEarningRows = earningList.map((row) => ({
+      lessonId: row.lessonId,
+      lessonDateIso: row.lesson.lessonDate.toISOString().slice(0, 10),
+      amountSom: row.amountSom,
+      student: row.lesson.student,
+    }));
   } catch {
     return <DbUnavailable />;
   }
@@ -56,9 +63,7 @@ export default async function TeacherDetailPage({ params }: PageProps) {
       </nav>
       <TeacherProfile
         teacher={teacher}
-        teacherPayments={teacherPayments}
-        totalTeacherShareSom={totalTeacherShareSom}
-        lessonEarningsSom={lessonEarningsSom}
+        lessonEarningRows={lessonEarningRows}
       />
     </div>
   );

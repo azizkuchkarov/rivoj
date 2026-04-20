@@ -5,26 +5,21 @@ import { Calendar, Pencil, Phone, Sparkles } from "lucide-react";
 import { deleteTeacher } from "@/app/teachers/actions";
 import { DeleteConfirmForm } from "@/components/common/DeleteConfirmForm";
 import { Avatar } from "@/components/teachers/Avatar";
-import { TeacherPaymentsSection } from "@/components/teachers/TeacherPaymentsSection";
-import type { Payment, Student, Teacher } from "@/generated/prisma/client";
-
-type PaymentForTeacher = Payment & {
-  student: Pick<Student, "id" | "fullName">;
-};
+import {
+  TeacherLessonEarningsSection,
+  type TeacherLessonEarningRow,
+} from "@/components/teachers/TeacherLessonEarningsSection";
+import { TeacherTelegramTestButton } from "@/components/teachers/TeacherTelegramTestButton";
+import type { Teacher } from "@/generated/prisma/client";
 
 type TeacherProfileProps = {
   teacher: Teacher;
-  teacherPayments: PaymentForTeacher[];
-  totalTeacherShareSom: number;
-  /** Darsda belgilangan keldi/to‘lov bo‘yicha tushum */
-  lessonEarningsSom?: number;
+  lessonEarningRows: TeacherLessonEarningRow[];
 };
 
 export function TeacherProfile({
   teacher,
-  teacherPayments,
-  totalTeacherShareSom,
-  lessonEarningsSom = 0,
+  lessonEarningRows,
 }: TeacherProfileProps) {
   const created = new Intl.DateTimeFormat("uz-UZ", {
     day: "numeric",
@@ -83,6 +78,7 @@ export function TeacherProfile({
               <Pencil className="h-4 w-4" aria-hidden />
               Profilni tahrirlash
             </Link>
+            <TeacherTelegramTestButton teacherId={teacher.id} />
             <DeleteConfirmForm
               action={deleteTeacher}
               id={teacher.id}
@@ -104,41 +100,20 @@ export function TeacherProfile({
             ))}
           </ul>
         ) : null}
+
+        <div className="relative mt-5 grid gap-2 text-sm text-[var(--ink-soft)] md:grid-cols-2">
+          <p className="inline-flex items-center gap-2">
+            <Phone className="h-4 w-4 text-teal-700" aria-hidden />
+            <span className="font-medium text-[var(--ink)]">Telefon:</span> {teacher.phone ?? "—"}
+          </p>
+          <p className="inline-flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-teal-700" aria-hidden />
+            <span className="font-medium text-[var(--ink)]">Ro‘yxatdan o‘tgan:</span> {created}
+          </p>
+        </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <aside className="space-y-4 lg:col-span-1">
-          <div className="rounded-3xl border border-white/60 bg-[color:var(--surface)] p-6 shadow-lg shadow-black/5">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Aloqa</h2>
-            <ul className="mt-4 space-y-4 text-[var(--ink-soft)]">
-              <li className="flex gap-3">
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-teal-50 text-teal-800 ring-1 ring-teal-100">
-                  <Phone className="h-4 w-4" aria-hidden />
-                </span>
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">Telefon</p>
-                  <p className="font-medium text-[var(--ink)]">{teacher.phone ?? "—"}</p>
-                </div>
-              </li>
-            </ul>
-          </div>
-          <div className="rounded-3xl border border-white/60 bg-[color:var(--surface)] p-6 shadow-lg shadow-black/5">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Profil</h2>
-            <p className="mt-3 flex items-center gap-2 text-sm text-[var(--muted)]">
-              <Calendar className="h-4 w-4 shrink-0" aria-hidden />
-              Ro‘yxatdan o‘tgan: {created}
-            </p>
-          </div>
-        </aside>
-
-        <article className="space-y-6 lg:col-span-2">
-          <TeacherPaymentsSection
-            payments={teacherPayments}
-            totalTeacherShareSom={totalTeacherShareSom}
-            lessonEarningsSom={lessonEarningsSom}
-          />
-        </article>
-      </div>
+      <TeacherLessonEarningsSection rows={lessonEarningRows} />
     </div>
   );
 }

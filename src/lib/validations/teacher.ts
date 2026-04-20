@@ -10,6 +10,15 @@ export const teacherFormSchema = z.object({
   fullName: z.string().trim().min(2, "Ism kamida 2 belgi bo‘lishi kerak").max(120),
   title: z.preprocess(emptyToUndefined, z.string().trim().max(80).optional()),
   phone: z.preprocess(emptyToUndefined, z.string().trim().max(32).optional()),
+  telegramChatId: z.preprocess(
+    emptyToUndefined,
+    z
+      .string()
+      .trim()
+      .regex(/^-?\d+$/, "Telegram chat ID faqat raqamlardan iborat bo‘lsin")
+      .max(32)
+      .optional(),
+  ),
   photoUrl: z.preprocess(
     emptyToUndefined,
     z.union([z.undefined(), z.string().url("Rasm URL noto‘g‘ri")]),

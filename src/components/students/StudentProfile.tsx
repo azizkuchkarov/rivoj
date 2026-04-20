@@ -123,92 +123,62 @@ export function StudentProfile({
             ))}
           </ul>
         ) : null}
+
+        <div className="relative mt-5 grid gap-2 text-sm text-[var(--ink-soft)] md:grid-cols-2">
+          <p className="inline-flex items-center gap-2">
+            <User className="h-4 w-4 text-violet-700" aria-hidden />
+            <span className="font-medium text-[var(--ink)]">Vasiy:</span> {student.guardianName ?? "—"}
+          </p>
+          <p className="inline-flex items-center gap-2">
+            <Phone className="h-4 w-4 text-violet-700" aria-hidden />
+            <span className="font-medium text-[var(--ink)]">Vasiy telefoni:</span> {student.guardianPhone ?? "—"}
+          </p>
+          <p className="inline-flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-violet-700" aria-hidden />
+            <span className="font-medium text-[var(--ink)]">Tug‘ilgan sana:</span> {dobFormatted ?? "—"}
+          </p>
+          <p className="inline-flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-violet-700" aria-hidden />
+            <span className="font-medium text-[var(--ink)]">Ro‘yxatga olingan:</span> {created}
+          </p>
+          <p className="md:col-span-2">
+            <span className="font-medium text-[var(--ink)]">Asosiy o‘qituvchi:</span>{" "}
+            {student.primaryTeacher ? (
+              <Link
+                href={`/teachers/${student.primaryTeacher.id}`}
+                className="font-medium text-violet-800 underline-offset-4 hover:underline"
+              >
+                {student.primaryTeacher.fullName}
+              </Link>
+            ) : (
+              <span className="font-medium text-[var(--ink)]">—</span>
+            )}
+            {student.primaryTeacher?.title ? <span className="text-zinc-400"> ({student.primaryTeacher.title})</span> : null}
+          </p>
+        </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <aside className="space-y-4 lg:col-span-1">
-          <div className="rounded-3xl border border-white/60 bg-[color:var(--surface)] p-6 shadow-lg shadow-black/5">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Vasiy</h2>
-            <ul className="mt-4 space-y-4 text-[var(--ink-soft)]">
-              <li className="flex gap-3">
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-violet-50 text-violet-800 ring-1 ring-violet-100">
-                  <User className="h-4 w-4" aria-hidden />
-                </span>
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">Ism</p>
-                  <p className="font-medium text-[var(--ink)]">{student.guardianName ?? "—"}</p>
-                </div>
-              </li>
-              <li className="flex gap-3">
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-violet-50 text-violet-800 ring-1 ring-violet-100">
-                  <Phone className="h-4 w-4" aria-hidden />
-                </span>
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">Telefon</p>
-                  <p className="font-medium text-[var(--ink)]">{student.guardianPhone ?? "—"}</p>
-                </div>
-              </li>
-            </ul>
-          </div>
+      <StudentScheduleSection lessons={upcomingLessons} />
 
-          <div className="rounded-3xl border border-white/60 bg-[color:var(--surface)] p-6 shadow-lg shadow-black/5">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Sana va biriktirish</h2>
-            <ul className="mt-3 space-y-3 text-sm text-[var(--muted)]">
-              <li className="flex items-start gap-2">
-                <Calendar className="mt-0.5 h-4 w-4 shrink-0 text-violet-700" aria-hidden />
-                <span>
-                  Tug‘ilgan sana:{" "}
-                  <span className="font-medium text-[var(--ink)]">{dobFormatted ?? "—"}</span>
-                </span>
-              </li>
-              <li>
-                Asosiy o‘qituvchi:{" "}
-                {student.primaryTeacher ? (
-                  <Link
-                    href={`/teachers/${student.primaryTeacher.id}`}
-                    className="font-medium text-violet-800 underline-offset-4 hover:underline"
-                  >
-                    {student.primaryTeacher.fullName}
-                  </Link>
-                ) : (
-                  <span className="font-medium text-[var(--ink)]">—</span>
-                )}
-                {student.primaryTeacher?.title ? (
-                  <span className="text-zinc-400"> ({student.primaryTeacher.title})</span>
-                ) : null}
-              </li>
-              <li className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 shrink-0 text-violet-700" aria-hidden />
-                Ro‘yxatga olingan: {created}
-              </li>
-            </ul>
-          </div>
-        </aside>
+      <StudentPaymentsSection
+        studentId={student.id}
+        studentFullName={student.fullName}
+        payments={payments}
+        primaryTeacher={student.primaryTeacher}
+        guardianDebts={guardianDebts}
+        totalSom={totalSom}
+        debtTotalSom={debtTotalSom}
+        subscriptionLessonsRemainingTotal={subscriptionLessonsRemainingTotal}
+      />
 
-        <article className="space-y-6 lg:col-span-2">
-          <StudentScheduleSection lessons={upcomingLessons} />
-
-          <StudentPaymentsSection
-            studentId={student.id}
-            studentFullName={student.fullName}
-            payments={payments}
-            primaryTeacher={student.primaryTeacher}
-            guardianDebts={guardianDebts}
-            totalSom={totalSom}
-            debtTotalSom={debtTotalSom}
-            subscriptionLessonsRemainingTotal={subscriptionLessonsRemainingTotal}
-          />
-
-          {student.notes?.trim() ? (
-            <div className="h-full rounded-3xl border border-white/60 bg-[color:var(--surface)] p-8 shadow-lg shadow-black/5">
-              <h2 className="text-lg font-semibold text-[var(--ink)]">Izoh</h2>
-              <p className="mt-4 whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--ink-soft)]">
-                {student.notes.trim()}
-              </p>
-            </div>
-          ) : null}
-        </article>
-      </div>
+      {student.notes?.trim() ? (
+        <div className="h-full rounded-3xl border border-white/60 bg-[color:var(--surface)] p-8 shadow-lg shadow-black/5">
+          <h2 className="text-lg font-semibold text-[var(--ink)]">Izoh</h2>
+          <p className="mt-4 whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--ink-soft)]">
+            {student.notes.trim()}
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 }

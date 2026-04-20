@@ -61,6 +61,8 @@ model Teacher {
   /// Masalan: katta logoped, defektolog
   title           String?
   phone           String?
+  /// Telegram bot uchun chat/user ID (botga /start bergan bo‘lishi kerak)
+  telegramChatId  String?   @unique
   /// Rasm URL (keyingida yuklash uchun)
   photoUrl        String?
   /// Mutaxassislik yo‘nalishlari

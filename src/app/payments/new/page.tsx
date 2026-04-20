@@ -15,12 +15,19 @@ export default async function NewPaymentPage({ searchParams }: PageProps) {
   const { studentId: studentIdParam } = await searchParams;
 
   let students;
+  let teachers;
 
   try {
-    students = await prisma.student.findMany({
-      orderBy: [{ isActive: "desc" }, { fullName: "asc" }],
-      select: { id: true, fullName: true, isActive: true },
-    });
+    [students, teachers] = await Promise.all([
+      prisma.student.findMany({
+        orderBy: [{ isActive: "desc" }, { fullName: "asc" }],
+        select: { id: true, fullName: true, isActive: true },
+      }),
+      prisma.teacher.findMany({
+        orderBy: [{ listNumber: "asc" }, { fullName: "asc" }],
+        select: { id: true, fullName: true, isActive: true },
+      }),
+    ]);
   } catch {
     return <DbUnavailable />;
   }
@@ -51,6 +58,7 @@ export default async function NewPaymentPage({ searchParams }: PageProps) {
         <PaymentForm
           action={createPayment}
           students={students}
+          teachers={teachers}
           defaultStudentId={defaultStudentId}
           defaultPaidAt={defaultPaidAt}
           submitLabel="To‘lovni saqlash"

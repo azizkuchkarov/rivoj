@@ -138,6 +138,7 @@ export function ScheduleWeekView({
   const showAddLinks = !isConsultation && basePath !== SCHEDULE_CONSULTATION_PATH;
 
   const [expandedSlot, setExpandedSlot] = useState<number | null>(null);
+  const [expandedCell, setExpandedCell] = useState<string | null>(null);
 
   const rangeLabel = formatWeekRangeLabelUtc(weekMonday);
 
@@ -173,7 +174,7 @@ export function ScheduleWeekView({
             shu vaqt bo‘yicha haftadagi barcha darslar ochiladi. {rangeLabel}
           </p>
         </div>
-        <div className="flex w-full min-w-0 flex-nowrap items-center justify-end gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5">
+        <div className="flex w-full min-w-0 flex-nowrap items-center justify-start gap-2 overflow-x-auto pb-0.5 lg:justify-end [-ms-overflow-style:none] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5">
           <ScheduleViewSwitcher
             active="week"
             weekMondayIso={weekMondayIso}
@@ -275,6 +276,8 @@ export function ScheduleWeekView({
                   const dayLessons = map.get(dayKey) ?? [];
                   const lookup = buildDaySlotLookup(dayLessons, slotStarts);
                   const atSlot = lookup.get(slotStart) ?? [];
+                  const cellKey = `${dayKey}|${slotStart}`;
+                  const cellOpen = expandedCell === cellKey;
 
                   return (
                     <div
@@ -289,9 +292,38 @@ export function ScheduleWeekView({
                           + Qoʻshish
                         </Link>
                       ) : null}
-                      {atSlot.map((L) => (
-                        <LessonMiniCard key={L.id} L={L} weekMondayIso={weekMondayIso} basePath={basePath} />
-                      ))}
+                      {atSlot.length > 0 ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setExpandedCell(cellOpen ? null : cellKey)}
+                            className={cn(
+                              "flex min-h-[40px] w-full items-center justify-center rounded-md border px-2 py-1 text-[10px] font-semibold transition",
+                              cellOpen
+                                ? "border-teal-300 bg-teal-100/80 text-teal-950"
+                                : "border-teal-200/80 bg-teal-50/60 text-teal-800 hover:border-teal-400 hover:bg-teal-100/70",
+                            )}
+                          >
+                            {atSlot.length} ta dars
+                          </button>
+                          {cellOpen ? (
+                            <div className="max-h-40 overflow-y-auto rounded-md border border-zinc-200/80 bg-white/90 p-1.5">
+                              <ul className="space-y-1">
+                                {atSlot.map((L) => (
+                                  <li
+                                    key={L.id}
+                                    className="rounded border border-zinc-100 bg-zinc-50/70 px-1.5 py-1 text-[10px] leading-tight text-[var(--ink)]"
+                                  >
+                                    <span className="font-semibold">{L.student.fullName}</span>
+                                    <span className="text-zinc-400"> · </span>
+                                    <span>№{L.teacher.listNumber} {L.teacher.fullName}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ) : null}
+                        </>
+                      ) : null}
                     </div>
                   );
                 })}

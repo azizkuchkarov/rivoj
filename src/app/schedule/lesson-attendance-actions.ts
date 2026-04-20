@@ -17,6 +17,7 @@ import { markLessonAttendanceSchema } from "@/lib/validations/lesson-attendance"
 export type LessonAttendanceActionState = {
   error?: string;
   success?: boolean;
+  rescheduleUrl?: string;
 };
 
 function formDataToObject(formData: FormData) {
@@ -42,6 +43,7 @@ export async function markLessonAttendance(
     select: {
       id: true,
       lessonDate: true,
+      startMinutes: true,
       teacherId: true,
       studentId: true,
       kind: true,
@@ -68,6 +70,10 @@ export async function markLessonAttendance(
 
   const markedAt = new Date();
   const dateStr = lesson.lessonDate.toISOString().slice(0, 10);
+  const nextDate = new Date(lesson.lessonDate);
+  nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+  const nextDateIso = nextDate.toISOString().slice(0, 10);
+  let shouldSuggestReschedule = false;
 
   try {
     await prisma.$transaction(async (tx) => {
@@ -76,11 +82,23 @@ export async function markLessonAttendance(
           where: { id: lesson.id },
           select: { consumedSubscriptionPaymentId: true },
         });
+        const hasOpenSubscription = await tx.payment.findFirst({
+          where: {
+            studentId: lesson.studentId,
+            kind: PaymentKind.SUBSCRIPTION,
+            subscriptionLessonsRemaining: { gt: 0 },
+          },
+          select: { id: true },
+        });
         if (current?.consumedSubscriptionPaymentId) {
           await tx.payment.update({
             where: { id: current.consumedSubscriptionPaymentId },
             data: { subscriptionLessonsRemaining: { increment: 1 } },
           });
+          shouldSuggestReschedule = true;
+        } else if (hasOpenSubscription && lesson.kind === LessonKind.LESSON) {
+          // Bu dars abonentlik oqimida bo‘lgan, lekin hali consume qilinmagan bo‘lishi mumkin.
+          shouldSuggestReschedule = true;
         }
         await tx.payment.deleteMany({ where: { lessonId: lesson.id } });
         await tx.studentDebt.deleteMany({ where: { lessonId: lesson.id } });
@@ -202,5 +220,10 @@ export async function markLessonAttendance(
   revalidatePath(`/teachers/${lesson.teacherId}`);
   revalidatePath("/payments");
 
-  return { success: true };
+  return {
+    success: true,
+    rescheduleUrl: shouldSuggestReschedule
+      ? `/schedule/new?teacherId=${encodeURIComponent(lesson.teacherId)}&studentId=${encodeURIComponent(lesson.studentId)}&lessonDate=${nextDateIso}&startMinutes=${lesson.startMinutes}&reuseSubscription=1`
+      : undefined,
+  };
 }

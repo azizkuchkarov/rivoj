@@ -13,6 +13,12 @@ function rangesOverlap(aStart: number, aEnd: number, bStart: number, bEnd: numbe
 }
 
 export type BookLessonResult = { ok: true } | { ok: false; error: string };
+export type BookLessonsBatchResult =
+  | {
+      ok: true;
+      createdLessons: { id: string; lessonDateYmd: string; startMinutes: number }[];
+    }
+  | { ok: false; error: string };
 
 /**
  * Dars yoki konsultatsiya yozuvini yaratadi (slot bandligi va o‘qituvchi talablari bilan).
@@ -147,7 +153,7 @@ export async function bookLessonsBatchWithDb(
     slots: LessonSlotInput[];
     notes?: string | null;
   },
-): Promise<BookLessonResult> {
+): Promise<BookLessonsBatchResult> {
   const { kind, teacherId, studentId, notes } = params;
   const slots = dedupeSlots(params.slots);
   if (slots.length === 0) {
@@ -251,7 +257,7 @@ export async function bookLessonsBatchWithDb(
   }
 
   try {
-    await Promise.all(
+    const created = await Promise.all(
       sorted.map((s) =>
         db.lesson.create({
           data: {
@@ -266,9 +272,15 @@ export async function bookLessonsBatchWithDb(
         }),
       ),
     );
+    return {
+      ok: true,
+      createdLessons: created.map((L) => ({
+        id: L.id,
+        lessonDateYmd: L.lessonDate.toISOString().slice(0, 10),
+        startMinutes: L.startMinutes,
+      })),
+    };
   } catch {
     return { ok: false, error: "Saqlashda xatolik." };
   }
-
-  return { ok: true };
 }

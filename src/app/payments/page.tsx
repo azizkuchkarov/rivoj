@@ -23,9 +23,19 @@ export default async function PaymentsPage({ searchParams }: PageProps) {
   let payments;
   let studentsForFilter;
   let paymentTotalAgg;
+  let effectiveStudentId: string | undefined;
   try {
-    const where = filterStudentId ? { studentId: filterStudentId } : {};
-    [payments, studentsForFilter, paymentTotalAgg] = await Promise.all([
+    studentsForFilter = await prisma.student.findMany({
+      where: { isActive: true },
+      orderBy: { fullName: "asc" },
+      select: { id: true, fullName: true },
+    });
+
+    effectiveStudentId =
+      filterStudentId && studentsForFilter.some((s) => s.id === filterStudentId) ? filterStudentId : undefined;
+
+    const where = effectiveStudentId ? { studentId: effectiveStudentId } : {};
+    [payments, paymentTotalAgg] = await Promise.all([
       prisma.payment.findMany({
         where,
         include: {
@@ -33,11 +43,6 @@ export default async function PaymentsPage({ searchParams }: PageProps) {
           teacher: { select: { id: true, fullName: true } },
         },
         orderBy: [{ paidAt: "desc" }, { createdAt: "desc" }],
-      }),
-      prisma.student.findMany({
-        where: { isActive: true },
-        orderBy: { fullName: "asc" },
-        select: { id: true, fullName: true },
       }),
       prisma.payment.aggregate({
         where,
@@ -71,7 +76,7 @@ export default async function PaymentsPage({ searchParams }: PageProps) {
           <label htmlFor="filter-student" className="text-xs font-medium uppercase tracking-wide text-zinc-500">
             O‘quvchi bo‘yicha filtr
           </label>
-          <PaymentsStudentFilter students={studentsForFilter} currentStudentId={filterStudentId} />
+          <PaymentsStudentFilter students={studentsForFilter} currentStudentId={effectiveStudentId} />
         </div>
         <div className="rounded-xl bg-violet-50/80 px-4 py-3 text-right ring-1 ring-violet-100">
           <p className="text-xs font-medium uppercase tracking-wide text-violet-700">Tanlangan filtr bo‘yicha jami</p>

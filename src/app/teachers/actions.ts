@@ -6,11 +6,17 @@ import { redirect } from "next/navigation";
 import { Prisma } from "@/generated/prisma/client";
 
 import { prisma } from "@/lib/prisma";
+import { sendTelegramText } from "@/lib/telegram";
 import { teacherFormSchema } from "@/lib/validations/teacher";
 
 export type TeacherActionState = {
   error?: string;
   fieldErrors?: Record<string, string>;
+};
+
+export type TeacherTelegramTestActionState = {
+  error?: string;
+  success?: string;
 };
 
 /**
@@ -48,6 +54,7 @@ function formDataToObject(formData: FormData) {
     fullName: String(formData.get("fullName") ?? ""),
     title: String(formData.get("title") ?? ""),
     phone: String(formData.get("phone") ?? ""),
+    telegramChatId: String(formData.get("telegramChatId") ?? ""),
     photoUrl: String(formData.get("photoUrl") ?? ""),
     specialties: String(formData.get("specialties") ?? ""),
     experienceYears: String(formData.get("experienceYears") ?? ""),
@@ -85,6 +92,7 @@ export async function createTeacher(
           fullName: data.fullName,
           title: data.title,
           phone: data.phone,
+          telegramChatId: data.telegramChatId,
           photoUrl: data.photoUrl,
           specialties: data.specialties,
           experienceYears: data.experienceYears,
@@ -143,6 +151,7 @@ export async function updateTeacher(
           fullName: data.fullName,
           title: data.title,
           phone: data.phone,
+          telegramChatId: data.telegramChatId,
           photoUrl: data.photoUrl,
           specialties: data.specialties,
           experienceYears: data.experienceYears,
@@ -177,4 +186,30 @@ export async function deleteTeacher(formData: FormData) {
   revalidatePath("/konsultatsiya/qabul");
   revalidatePath("/students");
   redirect("/teachers");
+}
+
+export async function sendTeacherTelegramTest(
+  _prev: TeacherTelegramTestActionState,
+  formData: FormData,
+): Promise<TeacherTelegramTestActionState> {
+  const teacherId = String(formData.get("teacherId") ?? "").trim();
+  if (!teacherId) return { error: "O‘qituvchi topilmadi." };
+
+  const teacher = await prisma.teacher.findUnique({
+    where: { id: teacherId },
+    select: { fullName: true, telegramChatId: true },
+  });
+  if (!teacher) return { error: "O‘qituvchi topilmadi." };
+  if (!teacher.telegramChatId) {
+    return { error: "Telegram chat ID kiritilmagan." };
+  }
+
+  const sent = await sendTelegramText(
+    teacher.telegramChatId,
+    `Test xabar\nO‘qituvchi: ${teacher.fullName}\nTelegram bog‘lanishi ishlayapti.`,
+  );
+  if (!sent.ok) {
+    return { error: `Yuborilmadi: ${sent.reason}` };
+  }
+  return { success: "Test xabar yuborildi." };
 }

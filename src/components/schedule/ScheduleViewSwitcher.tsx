@@ -23,11 +23,11 @@ export function ScheduleViewSwitcher({
   const dayHref = `${basePath}?view=day&date=${dayIso}`;
 
   return (
-    <div className="inline-flex rounded-full border border-zinc-200/90 bg-white/80 p-1 shadow-inner shadow-black/5">
+    <div className="inline-flex shrink-0 rounded-full border border-zinc-200/90 bg-white/80 p-1 shadow-inner shadow-black/5">
       <Link
         href={weekHref}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition",
+          "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition",
           active === "week"
             ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-deep)] text-white shadow-sm"
             : "text-[var(--ink-soft)] hover:bg-zinc-50",
@@ -39,7 +39,7 @@ export function ScheduleViewSwitcher({
       <Link
         href={dayHref}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition",
+          "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition",
           active === "day"
             ? "bg-gradient-to-r from-[var(--accent)] to-[var(--accent-deep)] text-white shadow-sm"
             : "text-[var(--ink-soft)] hover:bg-zinc-50",

@@ -19,6 +19,7 @@ type TeacherFormProps = {
       | "fullName"
       | "title"
       | "phone"
+      | "telegramChatId"
       | "photoUrl"
       | "specialties"
       | "experienceYears"
@@ -143,6 +144,25 @@ export function TeacherForm({ action, suggestedListNumber, defaultValues, submit
             placeholder="+998 …"
             autoComplete="tel"
           />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-[var(--ink-soft)]" htmlFor="telegramChatId">
+            Telegram chat ID
+          </label>
+          <input
+            id="telegramChatId"
+            name="telegramChatId"
+            defaultValue={dv.telegramChatId ?? ""}
+            className={fieldClass(state.fieldErrors?.telegramChatId)}
+            placeholder="123456789"
+          />
+          <p className="mt-1.5 text-xs text-[var(--muted)]">
+            O‘qituvchi botga /start berganidan keyin chiqqan chat/user ID ni kiriting.
+          </p>
+          {state.fieldErrors?.telegramChatId ? (
+            <p className="mt-1.5 text-xs text-red-600">{state.fieldErrors.telegramChatId}</p>
+          ) : null}
         </div>
 
         <div className="md:col-span-2">

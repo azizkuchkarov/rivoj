@@ -5,13 +5,14 @@ import { useActionState, useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import type { PaymentActionState } from "@/app/payments/actions";
-import type { Student } from "@/generated/prisma/client";
+import type { Student, Teacher } from "@/generated/prisma/client";
 import { PaymentKind, PaymentMethod } from "@/generated/prisma/enums";
 import { cn } from "@/lib/cn";
 
 type PaymentFormProps = {
   action: (state: PaymentActionState, formData: FormData) => Promise<PaymentActionState>;
   students: Pick<Student, "id" | "fullName" | "isActive">[];
+  teachers: Pick<Teacher, "id" | "fullName" | "isActive">[];
   defaultStudentId?: string;
   /** lockStudent bo‘lsa ko‘rsatiladi */
   lockedStudentName?: string;
@@ -40,6 +41,7 @@ function fieldClass(err?: string) {
 export function PaymentForm({
   action,
   students,
+  teachers,
   defaultStudentId = "",
   lockedStudentName,
   lockStudent = false,
@@ -50,6 +52,7 @@ export function PaymentForm({
 }: PaymentFormProps) {
   const [state, formAction, pending] = useActionState(action, {});
   const activeStudents = students.filter((s) => s.isActive);
+  const activeTeachers = teachers.filter((t) => t.isActive);
 
   const [kind, setKind] = useState<PaymentKind>(defaultKind);
   const [subLessons, setSubLessons] = useState("");
@@ -120,7 +123,9 @@ export function PaymentForm({
             onChange={(e) => setKind(e.target.value as PaymentKind)}
             className={fieldClass(state.fieldErrors?.kind)}
           >
-            <option value={PaymentKind.DAILY}>Kunlik to‘lov (o‘quvchi + o‘qituvchi ulushi)</option>
+            <option value={PaymentKind.DAILY}>
+              Bir martalik (har bir dars uchun o‘quvchi to‘lovi + o‘qituvchi ulushi)
+            </option>
             <option value={PaymentKind.SUBSCRIPTION}>
               Abonentlik (jami summa, darslar soni, har bir dars uchun o‘qituvchi ulushi — jadvaldagi o‘qituvchiga)
             </option>
@@ -168,26 +173,46 @@ export function PaymentForm({
         </div>
 
         {kind === PaymentKind.DAILY ? (
-          <div className="md:col-span-2">
-            <label className="mb-2 block text-sm font-medium text-[var(--ink-soft)]" htmlFor="teacherShareSom">
-              Shu to‘lovdan o‘qituvchiga (so‘m) <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="teacherShareSom"
-              name="teacherShareSom"
-              type="number"
-              required
-              min={0}
-              step={1000}
-              placeholder="50000"
-              className={fieldClass(state.fieldErrors?.teacherShareSom)}
-            />
-            <p className="mt-1.5 text-xs text-[var(--muted)]">
-              Masalan: bola 100 000 so‘m to‘lasa, o‘qituvchiga 50 000 so‘m yoziladi.
-            </p>
-            {state.fieldErrors?.teacherShareSom ? (
-              <p className="mt-1.5 text-xs text-red-600">{state.fieldErrors.teacherShareSom}</p>
-            ) : null}
+          <div className="md:col-span-2 grid gap-6 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-[var(--ink-soft)]" htmlFor="teacherId">
+                O‘qituvchi <span className="text-red-500">*</span>
+              </label>
+              <select id="teacherId" name="teacherId" required className={fieldClass(state.fieldErrors?.teacherId)}>
+                <option value="" disabled>
+                  Tanlang
+                </option>
+                {activeTeachers.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.fullName}
+                  </option>
+                ))}
+              </select>
+              {state.fieldErrors?.teacherId ? (
+                <p className="mt-1.5 text-xs text-red-600">{state.fieldErrors.teacherId}</p>
+              ) : null}
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-[var(--ink-soft)]" htmlFor="teacherShareSom">
+                Shu to‘lovdan o‘qituvchiga (so‘m) <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="teacherShareSom"
+                name="teacherShareSom"
+                type="number"
+                required
+                min={0}
+                step={1000}
+                placeholder="50000"
+                className={fieldClass(state.fieldErrors?.teacherShareSom)}
+              />
+              <p className="mt-1.5 text-xs text-[var(--muted)]">
+                Masalan: bola 190 000 so‘m to‘lasa, o‘qituvchiga 80 000 so‘m yoziladi.
+              </p>
+              {state.fieldErrors?.teacherShareSom ? (
+                <p className="mt-1.5 text-xs text-red-600">{state.fieldErrors.teacherShareSom}</p>
+              ) : null}
+            </div>
           </div>
         ) : (
           <>

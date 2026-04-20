@@ -9,7 +9,13 @@ import { startOfWeekMondayUTC, toISODateStringUTC } from "@/lib/week-utils";
 export const dynamic = "force-dynamic";
 
 type PageProps = {
-  searchParams: Promise<{ lessonDate?: string; teacherId?: string; startMinutes?: string }>;
+  searchParams: Promise<{
+    lessonDate?: string;
+    teacherId?: string;
+    studentId?: string;
+    startMinutes?: string;
+    reuseSubscription?: string;
+  }>;
 };
 
 export default async function NewLessonPage({ searchParams }: PageProps) {
@@ -36,7 +42,9 @@ export default async function NewLessonPage({ searchParams }: PageProps) {
 
   const slots = getSlotStartMinutesList();
   const teacherOk = Boolean(sp.teacherId && teachers.some((t) => t.id === sp.teacherId));
+  const studentOk = Boolean(sp.studentId && students.some((s) => s.id === sp.studentId));
   const defaultTeacherId = teacherOk ? sp.teacherId! : "";
+  const defaultStudentId = studentOk ? sp.studentId! : "";
 
   const parsedStart = sp.startMinutes != null ? Number.parseInt(String(sp.startMinutes), 10) : NaN;
   const defaultStartMinutes = Number.isFinite(parsedStart) && slots.includes(parsedStart) ? parsedStart : undefined;
@@ -47,12 +55,12 @@ export default async function NewLessonPage({ searchParams }: PageProps) {
     startOfWeekMondayUTC(new Date(`${anchorForWeek}T12:00:00.000Z`)),
   );
 
+  const fromGrid = Boolean(defaultTeacherId || defaultStartMinutes != null || (dateParam && dateParam !== today));
+  const reuseSubscription = sp.reuseSubscription === "1";
   const initialSlots =
-    dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam) && defaultStartMinutes != null
+    !reuseSubscription && dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam) && defaultStartMinutes != null
       ? [{ lessonDate: dateParam, startMinutes: defaultStartMinutes }]
       : [];
-
-  const fromGrid = Boolean(defaultTeacherId || defaultStartMinutes != null || (dateParam && dateParam !== today));
 
   return (
     <div className="space-y-8">
@@ -81,13 +89,14 @@ export default async function NewLessonPage({ searchParams }: PageProps) {
 
       <div className="rounded-[2rem] border border-white/70 bg-[color:var(--surface)] p-6 shadow-xl shadow-black/5 md:p-10">
         <LessonPlannerForm
-          key={`${defaultLessonDate}-${defaultTeacherId}-${initialWeekMondayIso}`}
+          key={`${defaultLessonDate}-${defaultTeacherId}-${defaultStudentId}-${initialWeekMondayIso}-${reuseSubscription ? "reuse" : "new"}`}
           teachers={teachers}
           students={students}
           initialTeacherId={defaultTeacherId}
-          initialStudentId=""
+          initialStudentId={defaultStudentId}
           initialWeekMondayIso={initialWeekMondayIso}
           initialSlots={initialSlots}
+          reuseSubscription={reuseSubscription}
         />
       </div>
     </div>
