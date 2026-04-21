@@ -30,8 +30,17 @@ export function LessonAttendanceDialog({ lesson, onClose }: LessonAttendanceDial
   const router = useRouter();
   const [state, formAction, pending] = useActionState(markLessonAttendance, {} as LessonAttendanceActionState);
 
+  const isUnmarked = lesson.attendance === LessonAttendance.UNMARKED;
+  const isAbsentLocked = lesson.attendance === LessonAttendance.ABSENT;
+  const isPresentPaidLocked =
+    lesson.attendance === LessonAttendance.PRESENT && lesson.guardianFee === LessonGuardianFee.PAID;
+  const isPresentUnpaidUpgrade =
+    lesson.attendance === LessonAttendance.PRESENT && lesson.guardianFee === LessonGuardianFee.UNPAID;
+
+  const fullyLocked = isAbsentLocked || isPresentPaidLocked;
+
   const [attendance, setAttendance] = useState<LessonAttendance>(
-    lesson.attendance === LessonAttendance.UNMARKED ? LessonAttendance.PRESENT : lesson.attendance,
+    isUnmarked ? LessonAttendance.PRESENT : lesson.attendance,
   );
   const [fee, setFee] = useState<LessonGuardianFee>(
     lesson.guardianFee === LessonGuardianFee.NA ? LessonGuardianFee.PAID : lesson.guardianFee,
@@ -50,6 +59,42 @@ export function LessonAttendanceDialog({ lesson, onClose }: LessonAttendanceDial
 
   const showFee = attendance === LessonAttendance.PRESENT;
   const dateLabel = formatLessonDateHeadingUzUtc(lesson.lessonDate);
+
+  if (fullyLocked) {
+    return (
+      <div
+        className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-4 sm:items-center"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="attendance-dialog-title"
+      >
+        <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-white/80 bg-[color:var(--surface)] p-6 shadow-2xl">
+          <h2 id="attendance-dialog-title" className="font-display text-lg font-semibold text-[var(--ink)]">
+            Dars holati
+          </h2>
+          <p className="mt-1 text-sm text-[var(--muted)]">
+            {dateLabel} · {lesson.teacher.listNumber ? `№${lesson.teacher.listNumber} ` : null}
+            {lesson.teacher.fullName} · {lesson.student.fullName}
+          </p>
+          <p className="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm text-[var(--ink)]">
+            Joriy holat: <strong>{attendanceLabel(lesson)}</strong>
+          </p>
+          <p className="mt-2 text-xs text-[var(--muted)]">
+            Belgilanganidan keyin «keldi / kelmadi» va to‘lovni qayta o‘zgartirib bo‘lmaydi.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full border border-zinc-200 px-6 py-2.5 text-sm font-medium text-[var(--ink-soft)] hover:bg-zinc-50"
+            >
+              Yopish
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -70,7 +115,9 @@ export function LessonAttendanceDialog({ lesson, onClose }: LessonAttendanceDial
         <div className="mt-4 rounded-2xl border border-teal-100 bg-teal-50/50 px-3 py-2 text-xs text-teal-950">
           <strong>Qoidalar:</strong> kelmagan — hisob yo‘q. Kelgan dars uchun summa «Yangi dars» / to‘lovlardan
           avtomatik olinadi (abonentlik yoki rejadagi kunlik ulush). Keldi va to‘lov qildi / to‘lamagan — tushum va
-          qarz shu bo‘yicha yuritiladi.
+          qarz shu bo‘yicha yuritiladi. Bir marta «keldi» yoki «kelmadi» tanlangandan keyin o‘zgartirib bo‘lmaydi;
+          to‘lov «qildi» bo‘lsa ham qayta o‘zgartirish yo‘q; «qarz» bo‘lsa keyinroq faqat «to‘lov qildi» deb
+          yangilash mumkin.
         </div>
 
         {state?.error ? (
@@ -82,94 +129,110 @@ export function LessonAttendanceDialog({ lesson, onClose }: LessonAttendanceDial
         <form action={formAction} className="mt-6 space-y-5">
           <input type="hidden" name="lessonId" value={lesson.id} />
 
-          <fieldset>
-            <legend className="mb-2 text-sm font-medium text-[var(--ink-soft)]">Bola darsga</legend>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <label
-                className={cn(
-                  "flex flex-1 cursor-pointer items-center gap-2 rounded-2xl border px-4 py-3 text-sm",
-                  attendance === LessonAttendance.PRESENT
-                    ? "border-teal-500 bg-teal-50 ring-2 ring-teal-200"
-                    : "border-zinc-200 bg-white/80",
-                )}
-              >
-                <input
-                  type="radio"
-                  name="attendance"
-                  value={LessonAttendance.PRESENT}
-                  checked={attendance === LessonAttendance.PRESENT}
-                  onChange={() => setAttendance(LessonAttendance.PRESENT)}
-                  className="sr-only"
-                />
-                Darsga keldi
-              </label>
-              <label
-                className={cn(
-                  "flex flex-1 cursor-pointer items-center gap-2 rounded-2xl border px-4 py-3 text-sm",
-                  attendance === LessonAttendance.ABSENT
-                    ? "border-zinc-500 bg-zinc-100 ring-2 ring-zinc-200"
-                    : "border-zinc-200 bg-white/80",
-                )}
-              >
-                <input
-                  type="radio"
-                  name="attendance"
-                  value={LessonAttendance.ABSENT}
-                  checked={attendance === LessonAttendance.ABSENT}
-                  onChange={() => setAttendance(LessonAttendance.ABSENT)}
-                  className="sr-only"
-                />
-                Darsga kelmadi
-              </label>
-            </div>
-          </fieldset>
-
-          {showFee ? (
+          {isPresentUnpaidUpgrade ? (
+            <>
+              <input type="hidden" name="attendance" value={LessonAttendance.PRESENT} />
+              <input type="hidden" name="guardianFee" value={LessonGuardianFee.PAID} />
+              <p className="rounded-2xl border border-amber-100 bg-amber-50/80 px-3 py-2 text-sm text-amber-950">
+                Hozir: <strong>{attendanceLabel(lesson)}</strong>. Faqat to‘lov kelgach «to‘lov qildi» deb
+                belgilashingiz mumkin.
+              </p>
+              <p className="rounded-2xl border border-emerald-200 bg-emerald-50/80 px-3 py-2 text-sm text-emerald-950">
+                Pastdagi tugma qarzni yopib, to‘lovni «qildi» holatiga o‘tkazadi (boshqa o‘zgartirish yo‘q).
+              </p>
+            </>
+          ) : (
             <>
               <fieldset>
-                <legend className="mb-2 text-sm font-medium text-[var(--ink-soft)]">To‘lov</legend>
+                <legend className="mb-2 text-sm font-medium text-[var(--ink-soft)]">Bola darsga</legend>
                 <div className="flex flex-col gap-2 sm:flex-row">
                   <label
                     className={cn(
                       "flex flex-1 cursor-pointer items-center gap-2 rounded-2xl border px-4 py-3 text-sm",
-                      fee === LessonGuardianFee.PAID
-                        ? "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200"
+                      attendance === LessonAttendance.PRESENT
+                        ? "border-teal-500 bg-teal-50 ring-2 ring-teal-200"
                         : "border-zinc-200 bg-white/80",
                     )}
                   >
                     <input
                       type="radio"
-                      name="guardianFee"
-                      value={LessonGuardianFee.PAID}
-                      checked={fee === LessonGuardianFee.PAID}
-                      onChange={() => setFee(LessonGuardianFee.PAID)}
+                      name="attendance"
+                      value={LessonAttendance.PRESENT}
+                      checked={attendance === LessonAttendance.PRESENT}
+                      onChange={() => setAttendance(LessonAttendance.PRESENT)}
                       className="sr-only"
                     />
-                    To‘lov qildi
+                    Darsga keldi
                   </label>
                   <label
                     className={cn(
                       "flex flex-1 cursor-pointer items-center gap-2 rounded-2xl border px-4 py-3 text-sm",
-                      fee === LessonGuardianFee.UNPAID
-                        ? "border-amber-500 bg-amber-50 ring-2 ring-amber-200"
+                      attendance === LessonAttendance.ABSENT
+                        ? "border-zinc-500 bg-zinc-100 ring-2 ring-zinc-200"
                         : "border-zinc-200 bg-white/80",
                     )}
                   >
                     <input
                       type="radio"
-                      name="guardianFee"
-                      value={LessonGuardianFee.UNPAID}
-                      checked={fee === LessonGuardianFee.UNPAID}
-                      onChange={() => setFee(LessonGuardianFee.UNPAID)}
+                      name="attendance"
+                      value={LessonAttendance.ABSENT}
+                      checked={attendance === LessonAttendance.ABSENT}
+                      onChange={() => setAttendance(LessonAttendance.ABSENT)}
                       className="sr-only"
                     />
-                    To‘lov qilmadi
+                    Darsga kelmadi
                   </label>
                 </div>
               </fieldset>
+
+              {showFee ? (
+                <>
+                  <fieldset>
+                    <legend className="mb-2 text-sm font-medium text-[var(--ink-soft)]">To‘lov</legend>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <label
+                        className={cn(
+                          "flex flex-1 cursor-pointer items-center gap-2 rounded-2xl border px-4 py-3 text-sm",
+                          fee === LessonGuardianFee.PAID
+                            ? "border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200"
+                            : "border-zinc-200 bg-white/80",
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name="guardianFee"
+                          value={LessonGuardianFee.PAID}
+                          checked={fee === LessonGuardianFee.PAID}
+                          onChange={() => setFee(LessonGuardianFee.PAID)}
+                          className="sr-only"
+                        />
+                        To‘lov qildi
+                      </label>
+                      <label
+                        className={cn(
+                          "flex flex-1 cursor-pointer items-center gap-2 rounded-2xl border px-4 py-3 text-sm",
+                          fee === LessonGuardianFee.UNPAID
+                            ? "border-amber-500 bg-amber-50 ring-2 ring-amber-200"
+                            : "border-zinc-200 bg-white/80",
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name="guardianFee"
+                          value={LessonGuardianFee.UNPAID}
+                          checked={fee === LessonGuardianFee.UNPAID}
+                          onChange={() => setFee(LessonGuardianFee.UNPAID)}
+                          className="sr-only"
+                        />
+                        To‘lov qilmadi
+                      </label>
+                    </div>
+                  </fieldset>
+                </>
+              ) : (
+                <input type="hidden" name="guardianFee" value={LessonGuardianFee.NA} />
+              )}
             </>
-          ) : (
-            <input type="hidden" name="guardianFee" value={LessonGuardianFee.NA} />
           )}
 
           <div className="flex flex-wrap gap-3 pt-2">
@@ -179,7 +242,7 @@ export function LessonAttendanceDialog({ lesson, onClose }: LessonAttendanceDial
               className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-deep)] px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:brightness-[1.03] disabled:opacity-60"
             >
               {pending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
-              Saqlash
+              {isPresentUnpaidUpgrade ? "To‘lov qildi deb saqlash" : "Saqlash"}
             </button>
             <button
               type="button"

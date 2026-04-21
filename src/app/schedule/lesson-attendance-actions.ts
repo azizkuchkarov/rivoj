@@ -48,6 +48,9 @@ export async function markLessonAttendance(
       studentId: true,
       kind: true,
       consumedSubscriptionPaymentId: true,
+      attendance: true,
+      guardianFee: true,
+      settlementSom: true,
     },
   });
 
@@ -67,6 +70,88 @@ export async function markLessonAttendance(
   }
 
   const data = parsed.data;
+
+  if (lesson.attendance === LessonAttendance.ABSENT) {
+    return {
+      error: "«Darsga kelmadi» allaqachon belgilangan. Buni o‘zgartirib bo‘lmaydi.",
+      success: false,
+    };
+  }
+
+  if (lesson.attendance === LessonAttendance.PRESENT) {
+    if (data.attendance !== LessonAttendance.PRESENT) {
+      return {
+        error: "«Darsga keldi» belgilangan. Keldi / kelmadi holatini keyin o‘zgartirib bo‘lmaydi.",
+        success: false,
+      };
+    }
+
+    if (lesson.guardianFee === LessonGuardianFee.PAID) {
+      return {
+        error: "To‘lov «qildi» deb belgilangan. Buni o‘zgartirib bo‘lmaydi.",
+        success: false,
+      };
+    }
+
+    if (lesson.guardianFee === LessonGuardianFee.UNPAID) {
+      if (data.guardianFee !== LessonGuardianFee.PAID) {
+        return {
+          error:
+            "To‘lov hali «qarz». Faqat keyinroq «to‘lov qildi» deb yangilash mumkin (boshqa o‘zgartirish yo‘q).",
+          success: false,
+        };
+      }
+
+      if (lesson.settlementSom == null) {
+        return {
+          error: "Dars bo‘yicha hisob topilmadi. Administratorga murojaat qiling.",
+          success: false,
+        };
+      }
+
+      try {
+        await prisma.$transaction(async (tx) => {
+          await tx.studentDebt.deleteMany({ where: { lessonId: lesson.id } });
+          await tx.payment.deleteMany({ where: { lessonId: lesson.id } });
+
+          await tx.teacherLessonEarning.upsert({
+            where: { lessonId: lesson.id },
+            create: {
+              lessonId: lesson.id,
+              teacherId: lesson.teacherId,
+              amountSom: lesson.settlementSom!,
+              payer: TeacherEarningPayer.GUARDIAN,
+            },
+            update: {
+              amountSom: lesson.settlementSom!,
+              payer: TeacherEarningPayer.GUARDIAN,
+              teacherId: lesson.teacherId,
+            },
+          });
+
+          await tx.lesson.update({
+            where: { id: lesson.id },
+            data: { guardianFee: LessonGuardianFee.PAID },
+          });
+        });
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Saqlashda xatolik";
+        return { error: msg, success: false };
+      }
+
+      revalidatePath(SCHEDULE_LESSON_PATH);
+      revalidatePath(SCHEDULE_CONSULTATION_PATH);
+      revalidatePath(`/students/${lesson.studentId}`);
+      revalidatePath(`/teachers/${lesson.teacherId}`);
+      revalidatePath("/payments");
+
+      return { success: true };
+    }
+  }
+
+  if (lesson.attendance !== LessonAttendance.UNMARKED) {
+    return { error: "Bu dars holati allaqachon belgilangan.", success: false };
+  }
 
   const markedAt = new Date();
   const dateStr = lesson.lessonDate.toISOString().slice(0, 10);
