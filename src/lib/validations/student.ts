@@ -27,6 +27,15 @@ export const studentFormSchema = z.object({
   ),
   guardianName: z.preprocess(emptyToUndefined, z.string().trim().max(120).optional()),
   guardianPhone: z.preprocess(emptyToUndefined, z.string().trim().max(32).optional()),
+  telegramChatId: z.preprocess(
+    emptyToUndefined,
+    z
+      .string()
+      .trim()
+      .regex(/^-?\d+$/, "Telegram chat ID faqat raqamlardan iborat bo‘lsin")
+      .max(32)
+      .optional(),
+  ),
   notes: z.preprocess(emptyToUndefined, z.string().max(8000).optional()),
   focusAreas: z
     .string()

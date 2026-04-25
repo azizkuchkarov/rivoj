@@ -23,7 +23,7 @@ export default async function NewStudentPage() {
       <div className="space-y-2">
         <Link
           href="/students"
-          className="text-sm font-medium text-violet-800/90 underline-offset-4 hover:underline"
+          className="text-sm font-medium text-violet-800 underline-offset-4 hover:underline"
         >
           ← O‘quvchilar ro‘yxati
         </Link>
@@ -35,7 +35,7 @@ export default async function NewStudentPage() {
         </p>
       </div>
 
-      <div className="rounded-[2rem] border border-white/70 bg-[color:var(--surface)] p-6 shadow-xl shadow-black/5 md:p-10">
+      <div className="rounded-[2rem] border border-border bg-[color:var(--surface)] p-6 shadow-sm md:p-10">
         <StudentForm action={createStudent} teachers={teachers} submitLabel="Saqlash" />
       </div>
     </div>

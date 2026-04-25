@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
-import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
+import { Fraunces, Plus_Jakarta_Sans, Geist } from "next/font/google";
 
 import { AppShell } from "@/components/layout/AppShell";
 
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
-const jakarta = Plus_Jakarta_Sans({
-  variable: "--font-sans",
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700"],
-});
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const fraunces = Fraunces({
   variable: "--font-display",
@@ -28,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="uz" className={`${jakarta.variable} ${fraunces.variable} h-full antialiased`}>
+    <html lang="uz" className={cn("h-full", "antialiased", fraunces.variable, "font-sans", geist.variable)}>
       <body className="min-h-full flex flex-col">
         <AppShell>{children}</AppShell>
       </body>

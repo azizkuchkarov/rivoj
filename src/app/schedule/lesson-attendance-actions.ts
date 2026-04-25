@@ -112,7 +112,6 @@ export async function markLessonAttendance(
       try {
         await prisma.$transaction(async (tx) => {
           await tx.studentDebt.deleteMany({ where: { lessonId: lesson.id } });
-          await tx.payment.deleteMany({ where: { lessonId: lesson.id } });
 
           await tx.teacherLessonEarning.upsert({
             where: { lessonId: lesson.id },
@@ -210,7 +209,9 @@ export async function markLessonAttendance(
         consumedSubscriptionPaymentId: lesson.consumedSubscriptionPaymentId,
       });
 
-      if (resolved.earningAmount <= 0) {
+      const isConsultationFlow = lesson.kind === LessonKind.CONSULTATION;
+
+      if (!isConsultationFlow && resolved.earningAmount <= 0) {
         throw new Error(
           "BATCH:O‘qituvchi ulushi topilmadi. Avval «Yangi dars» yoki to‘lov (kunlik / abonentlik) kiritilgan bo‘lsin.",
         );
@@ -225,19 +226,48 @@ export async function markLessonAttendance(
 
       const earningAmount = resolved.earningAmount;
       const consumedPaymentId = resolved.consumedSubscriptionPaymentId;
+      const isSubscriptionFlow = Boolean(resolved.subscriptionPaymentToDecrement || consumedPaymentId);
+
+      if (!isSubscriptionFlow && !isConsultationFlow && gf !== LessonGuardianFee.PAID && gf !== LessonGuardianFee.UNPAID) {
+        throw new Error("BATCH:To‘lov holatini tanlang.");
+      }
 
       await tx.lesson.update({
         where: { id: lesson.id },
         data: {
           attendance: LessonAttendance.PRESENT,
-          guardianFee: gf,
+          guardianFee: isConsultationFlow
+            ? LessonGuardianFee.PAID
+            : isSubscriptionFlow
+              ? LessonGuardianFee.NA
+              : gf,
           settlementSom: earningAmount,
           attendanceMarkedAt: markedAt,
           consumedSubscriptionPaymentId: consumedPaymentId,
         },
       });
 
-      if (gf === LessonGuardianFee.PAID) {
+      if (isConsultationFlow) {
+        await tx.studentDebt.deleteMany({ where: { lessonId: lesson.id } });
+        await tx.teacherLessonEarning.deleteMany({ where: { lessonId: lesson.id } });
+      } else if (isSubscriptionFlow) {
+        await tx.studentDebt.deleteMany({ where: { lessonId: lesson.id } });
+
+        await tx.teacherLessonEarning.upsert({
+          where: { lessonId: lesson.id },
+          create: {
+            lessonId: lesson.id,
+            teacherId: lesson.teacherId,
+            amountSom: earningAmount,
+            payer: TeacherEarningPayer.CENTER,
+          },
+          update: {
+            amountSom: earningAmount,
+            payer: TeacherEarningPayer.CENTER,
+            teacherId: lesson.teacherId,
+          },
+        });
+      } else if (gf === LessonGuardianFee.PAID) {
         await tx.studentDebt.deleteMany({ where: { lessonId: lesson.id } });
 
         await tx.teacherLessonEarning.upsert({
@@ -254,11 +284,7 @@ export async function markLessonAttendance(
             teacherId: lesson.teacherId,
           },
         });
-
-        await tx.payment.deleteMany({ where: { lessonId: lesson.id } });
       } else {
-        await tx.payment.deleteMany({ where: { lessonId: lesson.id } });
-
         const guardianDebtSom = resolved.guardianDebtAmountSom;
 
         await tx.studentDebt.upsert({

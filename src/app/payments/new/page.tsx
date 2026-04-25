@@ -48,7 +48,7 @@ export default async function NewPaymentPage({ searchParams }: PageProps) {
         <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--ink)] md:text-4xl">
           Yangi to‘lov
         </h1>
-        <p className="max-w-2xl text-[15px] leading-relaxed text-[var(--muted)]">
+        <p className="max-w-2xl text-[15px] leading-relaxed text-black">
           Kunlik yoki abonentlik: summalar va ulushlarni kiriting. Abonentlikda har bir dars uchun ulush jadvaldagi
           o‘qituvchiga biriktiriladi.
         </p>

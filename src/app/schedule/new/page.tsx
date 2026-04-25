@@ -74,7 +74,7 @@ export default async function NewLessonPage({ searchParams }: PageProps) {
         <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--ink)] md:text-4xl">
           Yangi dars
         </h1>
-        <p className="max-w-2xl text-[15px] text-[var(--muted)]">
+        <p className="max-w-2xl text-[15px] text-black">
           O‘qituvchi va o‘quvchini tanlang, <strong>to‘lovni</strong> (bir martalik yoki abonentlik) kiriting — keyin
           haftalik jadval ochiladi. Bo‘sh kataklarni bosing, izoh qo‘shing va <strong>tasdiqlash</strong> bilan
           barcha darslar va to‘lov birgalikda saqlanadi.

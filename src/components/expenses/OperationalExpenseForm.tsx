@@ -76,6 +76,7 @@ export function OperationalExpenseForm({ action, defaultSpentAt }: OperationalEx
             min={1}
             step={1000}
             required
+            onWheel={(e) => e.currentTarget.blur()}
             className={fieldClass(state.fieldErrors?.amountSom)}
             placeholder="50000"
           />

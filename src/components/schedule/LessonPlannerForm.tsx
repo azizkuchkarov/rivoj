@@ -354,6 +354,7 @@ export function LessonPlannerForm({
                 step={1000}
                 value={payAmountSom}
                 onChange={(e) => setPayAmountSom(e.target.value)}
+                onWheel={(e) => e.currentTarget.blur()}
                 className={plannerFieldClass()}
                 placeholder="100000"
               />
@@ -402,6 +403,7 @@ export function LessonPlannerForm({
                   step={1000}
                   value={payTeacherShareSom}
                   onChange={(e) => setPayTeacherShareSom(e.target.value)}
+                  onWheel={(e) => e.currentTarget.blur()}
                   className={plannerFieldClass()}
                   placeholder="50000"
                 />
@@ -423,6 +425,7 @@ export function LessonPlannerForm({
                     step={1}
                     value={paySubLessons}
                     onChange={(e) => setPaySubLessons(e.target.value)}
+                    onWheel={(e) => e.currentTarget.blur()}
                     className={plannerFieldClass()}
                     placeholder="12"
                   />
@@ -438,6 +441,7 @@ export function LessonPlannerForm({
                     step={1000}
                     value={paySubPerLesson}
                     onChange={(e) => setPaySubPerLesson(e.target.value)}
+                    onWheel={(e) => e.currentTarget.blur()}
                     className={plannerFieldClass()}
                     placeholder="50000"
                   />
@@ -489,7 +493,7 @@ export function LessonPlannerForm({
             <button
               type="button"
               onClick={tryContinueToSchedule}
-              className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-purple-700 px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:brightness-[1.03]"
+              className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:brightness-[1.03]"
             >
               Jadvalga o‘tish — slotlarni tanlash
             </button>
@@ -529,7 +533,7 @@ export function LessonPlannerForm({
               <button
                 type="button"
                 onClick={() => shiftWeek(-1)}
-                className="inline-flex items-center gap-1 rounded-full border border-zinc-200 bg-white/90 px-3 py-2 text-sm font-medium text-[var(--ink-soft)] shadow-sm hover:bg-zinc-50"
+                className="inline-flex items-center gap-1 rounded-full border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-[var(--ink-soft)] hover:bg-zinc-50"
               >
                 <ChevronLeft className="h-4 w-4" aria-hidden />
                 Oldingi hafta
@@ -538,7 +542,7 @@ export function LessonPlannerForm({
               <button
                 type="button"
                 onClick={() => shiftWeek(1)}
-                className="inline-flex items-center gap-1 rounded-full border border-zinc-200 bg-white/90 px-3 py-2 text-sm font-medium text-[var(--ink-soft)] shadow-sm hover:bg-zinc-50"
+                className="inline-flex items-center gap-1 rounded-full border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-[var(--ink-soft)] hover:bg-zinc-50"
               >
                 Keyingi hafta
                 <ChevronRight className="h-4 w-4" aria-hidden />
@@ -546,16 +550,16 @@ export function LessonPlannerForm({
             </div>
           </div>
 
-          <div className="relative overflow-x-auto rounded-2xl border border-white/70 bg-[color:var(--surface)] shadow-lg shadow-black/5">
+          <div className="relative overflow-x-auto rounded-2xl border border-border bg-[color:var(--surface)]">
             {loading ? (
-              <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-[1px]">
+              <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-white">
                 <Loader2 className="h-8 w-8 animate-spin text-teal-600" aria-hidden />
               </div>
             ) : null}
             <table className="w-full min-w-[900px] border-collapse text-left text-xs">
               <thead>
-                <tr className="border-b border-zinc-200 bg-teal-50/80">
-                  <th className="sticky left-0 z-10 min-w-[88px] border-r border-zinc-200 bg-teal-50/98 px-2 py-2 font-semibold text-teal-900">
+                <tr className="border-b border-zinc-200 bg-teal-50">
+                  <th className="sticky left-0 z-10 min-w-[88px] border-r border-zinc-200 bg-teal-50 px-2 py-2 font-semibold text-teal-900">
                     Vaqt
                   </th>
                   {dayIsos.map((d) => (
@@ -726,7 +730,7 @@ export function LessonPlannerForm({
                     subscriptionPackSize != null &&
                     slotsPayload.length !== subscriptionPackSize)
                 }
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-deep)] px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-900/20 transition hover:brightness-[1.03] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground transition hover:brightness-[1.03] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {pending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
                 Tasdiqlash — {slotsPayload.length} ta darsni jadvalga qo‘shish
@@ -758,7 +762,7 @@ export function LessonPlannerForm({
           </form>
         </div>
       ) : teacherId && studentId && !scheduleUnlocked ? null : (
-        <p className="rounded-2xl border border-zinc-100 bg-zinc-50/50 px-4 py-3 text-sm text-[var(--muted)]">
+        <p className="rounded-2xl border border-zinc-100 bg-zinc-50 px-4 py-3 text-sm text-black">
           Avval <strong>o‘qituvchi</strong> va <strong>o‘quvchini</strong> tanlang, keyin <strong>to‘lov</strong>ni
           kiriting — undan keyin haftalik jadval ochiladi.
         </p>

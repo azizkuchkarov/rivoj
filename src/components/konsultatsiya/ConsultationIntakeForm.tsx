@@ -255,12 +255,35 @@ export function ConsultationIntakeForm({ teachers, defaultDate }: ConsultationIn
           </div>
         </section>
       ) : (
-        <p className="rounded-xl border border-dashed border-zinc-200 bg-zinc-50/50 px-4 py-3 text-sm text-[var(--muted)]">
+        <p className="rounded-xl border border-dashed border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-black">
           Avval o‘qituvchi va sanani tanlang — keyin bandliklar va bo‘sh vaqtlar chiqadi.
         </p>
       )}
 
       <section>
+        <div className="mb-4 grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-[var(--ink-soft)]" htmlFor="consultationAmountSom">
+              Konsultatsiya summasi (so‘m) <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="consultationAmountSom"
+              name="consultationAmountSom"
+              type="number"
+              min={1000}
+              step={1000}
+              required
+              defaultValue={100000}
+              onWheel={(e) => e.currentTarget.blur()}
+              className="w-full rounded-2xl border border-zinc-200/90 bg-white/80 px-4 py-3"
+              placeholder="100000"
+            />
+            {state.fieldErrors?.consultationAmountSom ? (
+              <p className="mt-1.5 text-xs text-red-600">{state.fieldErrors.consultationAmountSom}</p>
+            ) : null}
+          </div>
+        </div>
+
         <label className="mb-2 block text-sm font-medium text-[var(--ink-soft)]" htmlFor="notes">
           Izoh (ixtiyoriy)
         </label>

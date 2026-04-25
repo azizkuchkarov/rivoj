@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/telegram/profiles-1800",
+      "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/telegram/profiles-1900",
+      "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/telegram/daily-2000",
+      "schedule": "0 15 * * *"
+    }
+  ]
+}

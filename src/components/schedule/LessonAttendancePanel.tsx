@@ -15,6 +15,7 @@ function attendanceLabel(lesson: LessonWithRelations): string {
   if (lesson.attendance === LessonAttendance.UNMARKED) return "Belgilanmagan";
   if (lesson.attendance === LessonAttendance.ABSENT) return "Kelmadi";
   if (lesson.attendance === LessonAttendance.PRESENT) {
+    if (lesson.guardianFee === LessonGuardianFee.NA) return "Keldi · abonentlik";
     if (lesson.guardianFee === LessonGuardianFee.PAID) return "Keldi · to‘lov qildi";
     if (lesson.guardianFee === LessonGuardianFee.UNPAID) return "Keldi · to‘lov yo‘q (qarz)";
   }
@@ -38,12 +39,17 @@ export function LessonAttendanceDialog({ lesson, onClose }: LessonAttendanceDial
     lesson.attendance === LessonAttendance.PRESENT && lesson.guardianFee === LessonGuardianFee.UNPAID;
 
   const fullyLocked = isAbsentLocked || isPresentPaidLocked;
+  const isSubscriptionLesson =
+    lesson.consumedSubscriptionPaymentId != null ||
+    lesson.notes?.toLowerCase().includes("abonentlik") ||
+    lesson.notes?.toLowerCase().includes("abonent") ||
+    lesson.notes?.toLowerCase().includes("paket");
 
   const [attendance, setAttendance] = useState<LessonAttendance>(
     isUnmarked ? LessonAttendance.PRESENT : lesson.attendance,
   );
   const [fee, setFee] = useState<LessonGuardianFee>(
-    lesson.guardianFee === LessonGuardianFee.NA ? LessonGuardianFee.PAID : lesson.guardianFee,
+    isSubscriptionLesson || lesson.guardianFee === LessonGuardianFee.NA ? LessonGuardianFee.NA : lesson.guardianFee,
   );
 
   useEffect(() => {
@@ -57,7 +63,7 @@ export function LessonAttendanceDialog({ lesson, onClose }: LessonAttendanceDial
     }
   }, [state?.success, state?.rescheduleUrl, onClose, router]);
 
-  const showFee = attendance === LessonAttendance.PRESENT;
+  const showFee = attendance === LessonAttendance.PRESENT && !isSubscriptionLesson;
   const dateLabel = formatLessonDateHeadingUzUtc(lesson.lessonDate);
 
   if (fullyLocked) {
@@ -113,12 +119,15 @@ export function LessonAttendanceDialog({ lesson, onClose }: LessonAttendanceDial
         </p>
 
         <div className="mt-4 rounded-2xl border border-teal-100 bg-teal-50/50 px-3 py-2 text-xs text-teal-950">
-          <strong>Qoidalar:</strong> kelmagan — hisob yo‘q. Kelgan dars uchun summa «Yangi dars» / to‘lovlardan
-          avtomatik olinadi (abonentlik yoki rejadagi kunlik ulush). Keldi va to‘lov qildi / to‘lamagan — tushum va
-          qarz shu bo‘yicha yuritiladi. Bir marta «keldi» yoki «kelmadi» tanlangandan keyin o‘zgartirib bo‘lmaydi;
-          to‘lov «qildi» bo‘lsa ham qayta o‘zgartirish yo‘q; «qarz» bo‘lsa keyinroq faqat «to‘lov qildi» deb
-          yangilash mumkin.
+          <strong>Qoidalar:</strong> abonentlikda admin faqat «keldi / kelmadi» belgilaydi (har dars uchun alohida
+          to‘lov kiritilmaydi). Bir martalikda esa «to‘lov qildi / qilmadi» holati saqlanadi va qarz yuritiladi.
+          «Kelmadi» bo‘lsa, keyin boshqa kunga qayta belgilash mumkin.
         </div>
+        {isSubscriptionLesson ? (
+          <p className="mt-3 rounded-2xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs text-indigo-950">
+            Bu dars abonentlik oqimida. Shu sababli pastda «To‘lov qildi / qilmadi» tanlovi ko‘rsatilmaydi.
+          </p>
+        ) : null}
 
         {state?.error ? (
           <div role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900">
@@ -239,7 +248,7 @@ export function LessonAttendanceDialog({ lesson, onClose }: LessonAttendanceDial
             <button
               type="submit"
               disabled={pending}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-deep)] px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:brightness-[1.03] disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:brightness-[1.03] disabled:opacity-60"
             >
               {pending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
               {isPresentUnpaidUpgrade ? "To‘lov qildi deb saqlash" : "Saqlash"}
@@ -282,11 +291,11 @@ export function LessonAttendanceTrigger({
             ? "w-full px-2 py-1.5 text-[11px]"
             : compact
               ? "w-auto px-2 py-1 text-[10px]"
-              : "mt-1 w-full bg-white/90 px-1 py-0.5 text-[9px]",
+              : "mt-1 w-full bg-white px-1 py-0.5 text-[9px]",
         )}
       >
         {!isLabelMode ? <UserCheck className={cn("shrink-0", compact ? "h-3 w-3" : "h-2.5 w-2.5")} aria-hidden /> : null}
-        {label ?? "Keldi / to‘lov"}
+        {label ?? "Keldi / kelmadi"}
       </button>
       {!compact && !isLabelMode ? (
         <p className="mt-0.5 text-center text-[8px] leading-tight text-zinc-500">{attendanceLabel(lesson)}</p>

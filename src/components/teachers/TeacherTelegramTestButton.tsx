@@ -18,7 +18,7 @@ export function TeacherTelegramTestButton({ teacherId }: { teacherId: string }) 
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full border border-teal-200/80 bg-white/90 px-5 py-2.5 text-sm font-semibold text-teal-900 shadow-sm transition hover:border-teal-300 hover:bg-teal-50 disabled:opacity-60"
+        className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full border border-indigo-200 bg-white px-5 py-2.5 text-sm font-semibold text-indigo-900 shadow-sm transition hover:border-indigo-300 hover:bg-indigo-50 disabled:opacity-60"
       >
         {pending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Send className="h-4 w-4" aria-hidden />}
         Telegram test

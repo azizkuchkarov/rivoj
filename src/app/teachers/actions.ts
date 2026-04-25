@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { Prisma } from "@/generated/prisma/client";
 
 import { prisma } from "@/lib/prisma";
-import { sendTelegramText } from "@/lib/telegram";
+import { sendTeachersTomorrowSchedules } from "@/lib/telegram-schedule";
 import { teacherFormSchema } from "@/lib/validations/teacher";
 
 export type TeacherActionState = {
@@ -204,12 +204,9 @@ export async function sendTeacherTelegramTest(
     return { error: "Telegram chat ID kiritilmagan." };
   }
 
-  const sent = await sendTelegramText(
-    teacher.telegramChatId,
-    `Test xabar\nO‘qituvchi: ${teacher.fullName}\nTelegram bog‘lanishi ishlayapti.`,
-  );
-  if (!sent.ok) {
-    return { error: `Yuborilmadi: ${sent.reason}` };
+  const stats = await sendTeachersTomorrowSchedules({ teacherId });
+  if (stats.sent < 1) {
+    return { error: "Ertangi kun jadvali yuborilmadi. Telegram ID yoki jadvalni tekshiring." };
   }
-  return { success: "Test xabar yuborildi." };
+  return { success: "Ertangi kun jadvali test tariqasida yuborildi." };
 }

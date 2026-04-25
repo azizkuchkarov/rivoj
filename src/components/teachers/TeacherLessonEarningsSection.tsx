@@ -67,7 +67,7 @@ export function TeacherLessonEarningsSection({ rows }: TeacherLessonEarningsSect
   const weeklyShareSum = weeklyRows.reduce((sum, r) => sum + r.amountSom, 0);
 
   return (
-    <section className="space-y-6 rounded-3xl border border-white/60 bg-[color:var(--surface)] p-6 shadow-lg shadow-black/5 md:p-8">
+    <section className="space-y-6 rounded-3xl border border-border bg-[color:var(--surface)] p-6 shadow-sm md:p-8">
       <header className="space-y-1">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-[var(--ink)]">
           <TrendingUp className="h-5 w-5 text-teal-600" aria-hidden />
@@ -79,7 +79,7 @@ export function TeacherLessonEarningsSection({ rows }: TeacherLessonEarningsSect
       </header>
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <div className="space-y-4 rounded-2xl border border-zinc-100/90 bg-white/50 p-4">
+        <div className="space-y-4 rounded-2xl border border-zinc-100 bg-white p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-sm font-semibold text-[var(--ink)]">Kunlik darslar</h3>
             <label className="inline-flex items-center gap-2 text-xs text-[var(--muted)]">
@@ -93,21 +93,21 @@ export function TeacherLessonEarningsSection({ rows }: TeacherLessonEarningsSect
             </label>
           </div>
           {dailyRows.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-zinc-200 bg-zinc-50/70 px-3 py-4 text-sm text-[var(--muted)]">
+            <p className="rounded-xl border border-dashed border-zinc-200 bg-zinc-50 px-3 py-4 text-sm text-[var(--muted)]">
               {formatDateIso(selectedDayIso)} uchun dars yozuvi topilmadi.
             </p>
           ) : (
             <div className="overflow-x-auto rounded-xl border border-zinc-100">
               <table className="w-full min-w-[420px] text-left text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-200 bg-teal-50/70">
+                  <tr className="border-b border-zinc-200 bg-indigo-50">
                     <th className="px-3 py-2 font-semibold text-zinc-700">O‘quvchi</th>
                     <th className="px-3 py-2 font-semibold text-zinc-700">Ulush</th>
                   </tr>
                 </thead>
                 <tbody>
                   {dailyRows.map((r) => (
-                    <tr key={r.lessonId} className="border-b border-zinc-100/90 last:border-0">
+                    <tr key={r.lessonId} className="border-b border-zinc-100 last:border-0">
                       <td className="px-3 py-2.5">
                         <Link
                           href={`/students/${r.student.id}`}
@@ -127,7 +127,7 @@ export function TeacherLessonEarningsSection({ rows }: TeacherLessonEarningsSect
           )}
         </div>
 
-        <div className="space-y-4 rounded-2xl border border-zinc-100/90 bg-white/50 p-4">
+        <div className="space-y-4 rounded-2xl border border-zinc-100 bg-white p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-sm font-semibold text-[var(--ink)]">Haftalik hisobot</h3>
             <label className="inline-flex items-center gap-2 text-xs text-[var(--muted)]">
@@ -144,16 +144,16 @@ export function TeacherLessonEarningsSection({ rows }: TeacherLessonEarningsSect
             Hafta oralig‘i: {formatDateIso(selectedWeekMondayIso)} — {formatDateIso(weekEndIso)}
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-teal-100 bg-teal-50/70 px-3 py-3">
+            <div className="rounded-xl border border-indigo-100 bg-indigo-50 px-3 py-3">
               <p className="text-xs font-medium uppercase tracking-wide text-teal-800">O‘tgan darslar</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums text-teal-950">{weeklyLessonsCount}</p>
             </div>
-            <div className="rounded-xl border border-violet-100 bg-violet-50/70 px-3 py-3">
+            <div className="rounded-xl border border-violet-100 bg-violet-50 px-3 py-3">
               <p className="text-xs font-medium uppercase tracking-wide text-violet-800">Jami ulush</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums text-violet-950">
                 {formatSomUZS(weeklyShareSum)}
               </p>
-              <p className="text-xs text-violet-800/80">so‘m</p>
+              <p className="text-xs text-violet-800">so‘m</p>
             </div>
           </div>
         </div>

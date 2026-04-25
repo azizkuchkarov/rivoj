@@ -2,41 +2,42 @@ import Link from "next/link";
 
 import { Sparkles } from "lucide-react";
 
-const nav = [
-  { href: "/schedule", label: "Dars jadvali" },
-  { href: "/konsultatsiya", label: "Konsultatsiya jadvali" },
-  { href: "/teachers", label: "O‘qituvchilar" },
-  { href: "/students", label: "O‘quvchilar" },
-  { href: "/payments", label: "To‘lovlar" },
-  { href: "/expenses", label: "Xarajat" },
-];
+import { logoutAction } from "@/app/login/actions";
+import { AttendanceNotifications } from "@/components/layout/AttendanceNotifications";
+import { MobileNav } from "@/components/layout/MobileNav";
+import { Separator } from "@/components/ui/separator";
+import { getCurrentRole } from "@/lib/auth";
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const role = await getCurrentRole();
+  const safeRole = role ?? "manager";
   return (
-    <header className="sticky top-0 z-40 border-b border-white/40 bg-[color:var(--surface-glass)] backdrop-blur-xl">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-        <Link href="/" className="group flex items-center gap-2.5">
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-deep)] text-white shadow-lg shadow-teal-900/15 ring-2 ring-white/70 transition group-hover:scale-[1.02]">
-            <Sparkles className="h-5 w-5" strokeWidth={2} aria-hidden />
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background px-4 lg:px-6">
+      <MobileNav role={safeRole} />
+      <Separator orientation="vertical" className="h-6 lg:hidden" />
+      <Link href="/" className="flex min-w-0 items-center gap-2 lg:hidden">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+          <Sparkles className="size-4" aria-hidden />
+        </span>
+        <span className="truncate text-sm font-semibold">Rivoj</span>
+      </Link>
+      <div className="ml-auto flex items-center gap-2">
+        {role ? (
+          <span className="rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-xs font-semibold text-zinc-700">
+            {role === "manager" ? "Manager" : "Admin"}
           </span>
-          <span className="flex flex-col leading-tight">
-            <span className="text-sm font-semibold tracking-tight text-[var(--ink)]">Rivoj</span>
-            <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--muted)]">
-              Logopedik markaz
-            </span>
-          </span>
-        </Link>
-        <nav className="flex items-center gap-1 sm:gap-2">
-          {nav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded-full px-3 py-2 text-sm font-medium text-[var(--ink-soft)] transition hover:bg-white/70 hover:text-[var(--ink)] sm:px-4"
+        ) : null}
+        <AttendanceNotifications />
+        {role ? (
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"
             >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+              Chiqish
+            </button>
+          </form>
+        ) : null}
       </div>
     </header>
   );

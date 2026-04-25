@@ -80,8 +80,8 @@ function LessonMiniCard({
   return (
     <div
       className={cn(
-        "w-full overflow-hidden rounded-md border px-1 py-0.5 text-[9px] leading-tight shadow-sm",
-        isCon ? "border-violet-400/50" : "border-amber-400/40",
+        "w-full overflow-hidden rounded-md border px-1 py-0.5 text-[9px] leading-tight",
+        isCon ? "border-violet-400" : "border-amber-400",
       )}
       style={{
         background: isCon
@@ -94,7 +94,7 @@ function LessonMiniCard({
         <span
           className={cn(
             "shrink-0 rounded px-0.5 text-[6px] font-bold uppercase text-white",
-            isCon ? "bg-violet-600/90" : "bg-amber-600/90",
+            isCon ? "bg-violet-600" : "bg-amber-600",
           )}
         >
           {kindLabel}
@@ -112,7 +112,7 @@ function LessonMiniCard({
         <input type="hidden" name="returnBase" value={basePath} />
         <button
           type="submit"
-          className="inline-flex w-full items-center justify-center gap-0.5 rounded bg-white/80 py-0.5 text-[8px] font-medium text-red-700 ring-1 ring-red-200/80 hover:bg-red-50"
+          className="inline-flex w-full items-center justify-center gap-0.5 rounded bg-white py-0.5 text-[8px] font-medium text-red-700 ring-1 ring-red-200 hover:bg-red-50"
           aria-label={isCon ? "Konsultatsiyani o‘chirish" : "Darsni o‘chirish"}
         >
           <Trash2 className="h-2 w-2" aria-hidden />
@@ -169,7 +169,7 @@ export function ScheduleWeekView({
           <h1 className="font-display text-2xl font-semibold tracking-tight text-[var(--ink)] md:text-3xl">
             {isConsultation ? "Konsultatsiya jadvali — haftalik" : "Dars jadvali — haftalik"}
           </h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">
+          <p className="mt-1 text-sm text-black">
             Ustunda kunlar, qatorda soatlar. Bir vaqtda bir nechta dars — kataklarda ro‘yxat. Chapdagi soatni bosing —
             shu vaqt bo‘yicha haftadagi barcha darslar ochiladi. {rangeLabel}
           </p>
@@ -183,20 +183,20 @@ export function ScheduleWeekView({
           />
           <Link
             href={`${basePath}?view=week&week=${prev}`}
-            className="shrink-0 rounded-full border border-zinc-200 bg-white/90 px-4 py-2 text-sm font-medium text-[var(--ink-soft)] shadow-sm hover:bg-zinc-50"
+            className="shrink-0 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-soft)] hover:bg-zinc-50"
           >
             ← Oldingi hafta
           </Link>
           <Link
             href={`${basePath}?view=week&week=${next}`}
-            className="shrink-0 rounded-full border border-zinc-200 bg-white/90 px-4 py-2 text-sm font-medium text-[var(--ink-soft)] shadow-sm hover:bg-zinc-50"
+            className="shrink-0 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-soft)] hover:bg-zinc-50"
           >
             Keyingi hafta →
           </Link>
           {basePath !== SCHEDULE_CONSULTATION_PATH ? (
             <Link
               href={`${basePath}/new`}
-              className="shrink-0 rounded-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-deep)] px-5 py-2 text-sm font-semibold text-white shadow-md hover:brightness-[1.03]"
+              className="shrink-0 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:brightness-[1.03]"
             >
               + Dars qo‘shish
             </Link>
@@ -204,7 +204,7 @@ export function ScheduleWeekView({
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-white/70 bg-[color:var(--surface)] p-2 shadow-lg shadow-black/5 md:p-3">
+      <div className="overflow-x-auto rounded-2xl border border-border bg-[color:var(--surface)] p-2 md:p-3">
         <div
           className="grid min-w-[720px] gap-0.5"
           style={{
@@ -212,7 +212,7 @@ export function ScheduleWeekView({
             gridTemplateRows: `auto repeat(${slotStarts.length}, minmax(56px, auto))`,
           }}
         >
-          <div className="rounded-tl-lg bg-teal-50/80 px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-teal-900">
+          <div className="rounded-tl-lg bg-indigo-50 px-2 py-2 text-[10px] font-semibold uppercase tracking-wide text-indigo-900">
             Vaqt
           </div>
           {keys.map((dayKey, idx) => {
@@ -221,7 +221,7 @@ export function ScheduleWeekView({
             return (
               <div
                 key={dayKey}
-                className="border-b border-zinc-100 bg-teal-50/80 px-1 py-2 text-center text-[10px] font-semibold text-teal-900"
+                className="border-b border-zinc-100 bg-indigo-50 px-1 py-2 text-center text-[10px] font-semibold text-indigo-900"
               >
                 <Link
                   href={`${basePath}?view=day&date=${toISODateStringUTC(dayDate)}`}
@@ -239,15 +239,15 @@ export function ScheduleWeekView({
 
             return (
               <div key={slotStart} className="contents">
-                <div className="flex flex-col justify-center border-b border-r border-zinc-100 bg-zinc-50/80 px-1 py-1">
+                <div className="flex flex-col justify-center border-b border-r border-zinc-100 bg-zinc-50 px-1 py-1">
                   <button
                     type="button"
                     onClick={() => setExpandedSlot(isOpen ? null : slotStart)}
                     className={cn(
                       "flex w-full items-center justify-between gap-1 rounded-lg px-1.5 py-1.5 text-left text-[11px] font-semibold transition",
                       isOpen
-                        ? "bg-teal-600 text-white shadow-sm"
-                        : "bg-white/90 text-teal-900 ring-1 ring-teal-100 hover:bg-teal-50",
+                        ? "bg-teal-600 text-white"
+                        : "bg-white text-teal-900 ring-1 ring-teal-100 hover:bg-teal-50",
                     )}
                     aria-expanded={isOpen}
                     title="Bosib, shu vaqt bo‘yicha haftadagi barcha darslarni oching / yoping"
@@ -258,7 +258,7 @@ export function ScheduleWeekView({
                         <span
                           className={cn(
                             "rounded-full px-1.5 py-0.5 text-[9px] font-bold tabular-nums",
-                            isOpen ? "bg-white/25 text-white" : "bg-teal-100 text-teal-900",
+                            isOpen ? "bg-white text-teal-900" : "bg-teal-100 text-teal-900",
                           )}
                         >
                           {totalThisHour}
@@ -282,12 +282,12 @@ export function ScheduleWeekView({
                   return (
                     <div
                       key={`${dayKey}-${slotStart}`}
-                      className="flex flex-col gap-1 border-b border-zinc-100/90 bg-white/40 p-1"
+                      className="flex flex-col gap-1 border-b border-zinc-100 bg-white p-1"
                     >
                       {atSlot.length === 0 && showAddLinks ? (
                         <Link
                           href={`${basePath}/new?lessonDate=${encodeURIComponent(dayKey)}&startMinutes=${slotStart}`}
-                          className="flex min-h-[40px] flex-1 items-center justify-center rounded-md border border-dashed border-teal-200/80 bg-teal-50/30 text-[10px] font-medium text-teal-700/70 transition hover:border-teal-400 hover:bg-teal-100/50"
+                          className="flex min-h-[40px] flex-1 items-center justify-center rounded-md border border-dashed border-teal-200 bg-teal-50 text-[10px] font-medium text-teal-700 transition hover:border-teal-400 hover:bg-teal-100"
                         >
                           + Qoʻshish
                         </Link>
@@ -300,19 +300,19 @@ export function ScheduleWeekView({
                             className={cn(
                               "flex min-h-[40px] w-full items-center justify-center rounded-md border px-2 py-1 text-[10px] font-semibold transition",
                               cellOpen
-                                ? "border-teal-300 bg-teal-100/80 text-teal-950"
-                                : "border-teal-200/80 bg-teal-50/60 text-teal-800 hover:border-teal-400 hover:bg-teal-100/70",
+                                ? "border-teal-300 bg-teal-100 text-teal-950"
+                                : "border-teal-200 bg-teal-50 text-teal-800 hover:border-teal-400 hover:bg-teal-100",
                             )}
                           >
                             {atSlot.length} ta dars
                           </button>
                           {cellOpen ? (
-                            <div className="max-h-40 overflow-y-auto rounded-md border border-zinc-200/80 bg-white/90 p-1.5">
+                            <div className="max-h-40 overflow-y-auto rounded-md border border-zinc-200 bg-white p-1.5">
                               <ul className="space-y-1">
                                 {atSlot.map((L) => (
                                   <li
                                     key={L.id}
-                                    className="rounded border border-zinc-100 bg-zinc-50/70 px-1.5 py-1 text-[10px] leading-tight text-[var(--ink)]"
+                                    className="rounded border border-zinc-100 bg-zinc-50 px-1.5 py-1 text-[10px] leading-tight text-[var(--ink)]"
                                   >
                                     <span className="font-semibold">{L.student.fullName}</span>
                                     <span className="text-zinc-400"> · </span>
@@ -334,14 +334,14 @@ export function ScheduleWeekView({
 
         {expandedSlot !== null ? (
           <div
-            className="mt-3 rounded-xl border border-teal-200 bg-teal-50/50 p-4"
+            className="mt-3 rounded-xl border border-teal-200 bg-teal-50 p-4"
             role="region"
             aria-label={`${formatMinutesAsClock(expandedSlot)} vaqti bo‘yicha darslar`}
           >
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-sm font-semibold text-teal-950">
                 {formatMinutesAsClock(expandedSlot)} — haftadagi barcha darslar
-                <span className="ml-2 font-normal text-teal-800/80">({lessonsAtExpandedSlot.length} ta)</span>
+                <span className="ml-2 font-normal text-teal-800">({lessonsAtExpandedSlot.length} ta)</span>
               </h2>
               <button
                 type="button"
@@ -352,7 +352,7 @@ export function ScheduleWeekView({
               </button>
             </div>
             {lessonsAtExpandedSlot.length === 0 ? (
-              <p className="text-sm text-teal-900/70">Bu vaqt uchun yozuv yo‘q.</p>
+              <p className="text-sm text-teal-900">Bu vaqt uchun yozuv yo‘q.</p>
             ) : (
               <ul className="space-y-2">
                 {lessonsAtExpandedSlot.map((L) => {
@@ -362,7 +362,7 @@ export function ScheduleWeekView({
                   return (
                     <li
                       key={L.id}
-                      className="flex flex-col gap-2 rounded-lg border border-white/80 bg-white/90 px-3 py-2 text-sm shadow-sm sm:flex-row sm:items-center sm:justify-between"
+                      className="flex flex-col gap-2 rounded-lg border border-zinc-100 bg-white px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="min-w-0 space-y-0.5">
                         <p className="font-medium text-[var(--ink)]">{dayLabel}</p>

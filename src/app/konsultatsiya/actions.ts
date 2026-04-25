@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { LessonKind } from "@/generated/prisma/enums";
+import { LessonKind, PaymentKind, PaymentMethod } from "@/generated/prisma/enums";
 import { bookLesson } from "@/lib/lesson-booking";
 import { prisma } from "@/lib/prisma";
 import { SCHEDULE_CONSULTATION_PATH, SCHEDULE_LESSON_PATH } from "@/lib/schedule-paths";
@@ -22,6 +22,10 @@ export type ConsultationIntakeState = {
   error?: string;
   fieldErrors?: Record<string, string>;
 };
+
+function normalizeFullName(fullName: string): string {
+  return fullName.trim().replace(/\s+/g, " ");
+}
 
 export async function getTeacherDayScheduleForIntake(
   teacherId: string,
@@ -70,6 +74,7 @@ function intakeFormToObject(formData: FormData) {
     teacherId: String(formData.get("teacherId") ?? ""),
     lessonDate: String(formData.get("lessonDate") ?? ""),
     startMinutes: String(formData.get("startMinutes") ?? ""),
+    consultationAmountSom: String(formData.get("consultationAmountSom") ?? ""),
     notes: String(formData.get("notes") ?? ""),
   };
 }
@@ -89,12 +94,21 @@ export async function registerConsultationIntake(
   }
 
   const data = parsed.data;
+  const normalizedFullName = normalizeFullName(data.fullName);
+
+  const existingByName = await prisma.student.findFirst({
+    where: { fullName: { equals: normalizedFullName, mode: "insensitive" } },
+    select: { id: true },
+  });
+  if (existingByName) {
+    return { error: "Bunday ism-familiyali o‘quvchi allaqachon mavjud." };
+  }
 
   let studentId: string;
   try {
     const created = await prisma.student.create({
       data: {
-        fullName: data.fullName,
+        fullName: normalizedFullName,
         guardianName: data.guardianName,
         guardianPhone: data.guardianPhone,
         isActive: true,
@@ -120,9 +134,60 @@ export async function registerConsultationIntake(
     return { error: result.error };
   }
 
+  try {
+    const createdLesson = await prisma.lesson.findFirst({
+      where: {
+        kind: LessonKind.CONSULTATION,
+        lessonDate: new Date(`${data.lessonDate}T00:00:00.000Z`),
+        startMinutes: data.startMinutes,
+        teacherId: data.teacherId,
+        studentId,
+      },
+      select: { id: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (!createdLesson) {
+      return { error: "Konsultatsiya saqlandi, lekin to‘lov yozuvini topib bo‘lmadi." };
+    }
+
+    await prisma.payment.upsert({
+      where: { lessonId: createdLesson.id },
+      create: {
+        studentId,
+        lessonId: createdLesson.id,
+        kind: PaymentKind.DAILY,
+        amountSom: data.consultationAmountSom,
+        paidAt: new Date(`${data.lessonDate}T12:00:00.000Z`),
+        method: PaymentMethod.CASH,
+        description: "Konsultatsiya to‘lovi",
+        notes: data.notes,
+        teacherId: null,
+        teacherShareSom: 0,
+        subscriptionLessonCount: null,
+        teacherSharePerLessonSom: null,
+        subscriptionLessonsRemaining: null,
+      },
+      update: {
+        amountSom: data.consultationAmountSom,
+        paidAt: new Date(`${data.lessonDate}T12:00:00.000Z`),
+        method: PaymentMethod.CASH,
+        description: "Konsultatsiya to‘lovi",
+        notes: data.notes,
+        teacherId: null,
+        teacherShareSom: 0,
+      },
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Konsultatsiya to‘lovi saqlanmadi";
+    return { error: msg };
+  }
+
   revalidatePath(SCHEDULE_CONSULTATION_PATH);
   revalidatePath(SCHEDULE_LESSON_PATH);
   revalidatePath("/students");
+  revalidatePath("/payments");
+  revalidatePath("/hisob-kitob");
 
   const monday = startOfWeekMondayUTC(new Date(`${data.lessonDate}T12:00:00.000Z`));
   const weekIso = toISODateStringUTC(monday);

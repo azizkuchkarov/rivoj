@@ -13,6 +13,12 @@ function emptyToUndefined(s: string | undefined) {
   return t === "" || t === undefined ? undefined : t;
 }
 
+function numFromForm(v: unknown): number | undefined {
+  if (v === "" || v === undefined || v === null) return undefined;
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.trunc(n) : undefined;
+}
+
 /** Konsultatsiyaga qabul — har doim yangi o‘quvchi kartochkasi */
 export const consultationIntakeSchema = z
   .object({
@@ -26,6 +32,10 @@ export const consultationIntakeSchema = z
       .min(1, "Bo‘sh vaqtni tanlang")
       .transform((s) => Number.parseInt(s, 10))
       .refine((n) => !Number.isNaN(n) && Number.isInteger(n), "Vaqt sloti noto‘g‘ri"),
+    consultationAmountSom: z.preprocess(
+      numFromForm,
+      z.number().int().min(1000, "Konsultatsiya summasi kamida 1000 so‘m").max(999_999_999, "Summa juda katta"),
+    ),
     notes: z.preprocess(emptyToUndefined, z.string().max(2000).optional()),
   })
   .superRefine((data, ctx) => {

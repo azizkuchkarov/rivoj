@@ -29,9 +29,7 @@ export function TeacherProfile({
 
   return (
     <div className="space-y-8">
-      <section className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-gradient-to-br from-white via-teal-50/40 to-amber-50/30 p-8 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.45)] md:p-10">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-teal-400/15 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 left-10 h-48 w-48 rounded-full bg-amber-300/20 blur-3xl" />
+      <section className="relative overflow-hidden rounded-[2rem] border border-border bg-white p-8 md:p-10">
 
         <div className="relative flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end">
@@ -42,22 +40,22 @@ export function TeacherProfile({
                   № {teacher.listNumber}
                 </span>
                 {teacher.isActive ? (
-                  <span className="inline-flex items-center rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-900 ring-1 ring-emerald-400/30">
+                  <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-900 ring-1 ring-emerald-300">
                     Faol
                   </span>
                 ) : (
-                  <span className="inline-flex items-center rounded-full bg-zinc-200/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-700">
+                  <span className="inline-flex items-center rounded-full bg-zinc-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-700">
                     Nofaol
                   </span>
                 )}
                 {typeof teacher.experienceYears === "number" ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-amber-950 ring-1 ring-amber-100">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-medium text-amber-950 ring-1 ring-amber-100">
                     <Sparkles className="h-3.5 w-3.5" aria-hidden />
                     {teacher.experienceYears} yil tajriba
                   </span>
                 ) : null}
                 {teacher.offersConsultation ? (
-                  <span className="inline-flex items-center rounded-full bg-violet-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-violet-900 ring-1 ring-violet-400/30">
+                  <span className="inline-flex items-center rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-violet-900 ring-1 ring-violet-300">
                     Konsultatsiya
                   </span>
                 ) : null}
@@ -73,7 +71,7 @@ export function TeacherProfile({
           <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
             <Link
               href={`/teachers/${teacher.id}/edit`}
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full border border-teal-200/80 bg-white/90 px-5 py-2.5 text-sm font-semibold text-teal-900 shadow-sm transition hover:border-teal-300 hover:bg-teal-50"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full border border-indigo-200 bg-white px-5 py-2.5 text-sm font-semibold text-indigo-900 transition hover:border-indigo-300 hover:bg-indigo-50"
             >
               <Pencil className="h-4 w-4" aria-hidden />
               Profilni tahrirlash
@@ -93,7 +91,7 @@ export function TeacherProfile({
             {teacher.specialties.map((s) => (
               <li
                 key={s}
-                className="rounded-full bg-white/90 px-4 py-1.5 text-sm font-medium text-teal-950 ring-1 ring-teal-100 shadow-sm"
+                className="rounded-full bg-white px-4 py-1.5 text-sm font-medium text-indigo-950 ring-1 ring-indigo-100"
               >
                 {s}
               </li>

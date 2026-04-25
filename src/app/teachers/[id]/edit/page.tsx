@@ -30,13 +30,13 @@ export default async function EditTeacherPage({ params }: PageProps) {
     <div className="space-y-8">
       <div className="space-y-2">
         <nav className="text-sm text-[var(--muted)]">
-          <Link href="/teachers" className="font-medium text-teal-800/90 underline-offset-4 hover:underline">
+          <Link href="/teachers" className="font-medium text-indigo-800 underline-offset-4 hover:underline">
             O‘qituvchilar
           </Link>
           <span className="mx-2 text-zinc-300">/</span>
           <Link
             href={`/teachers/${teacher.id}`}
-            className="font-medium text-teal-800/90 underline-offset-4 hover:underline"
+            className="font-medium text-indigo-800 underline-offset-4 hover:underline"
           >
             {teacher.fullName}
           </Link>
@@ -49,7 +49,7 @@ export default async function EditTeacherPage({ params }: PageProps) {
         <p className="text-[15px] text-[var(--muted)]">O‘zgarishlar saqlangach profil sahifasiga yo‘naltiriladi.</p>
       </div>
 
-      <div className="rounded-[2rem] border border-white/70 bg-[color:var(--surface)] p-6 shadow-xl shadow-black/5 md:p-10">
+      <div className="rounded-[2rem] border border-border bg-[color:var(--surface)] p-6 shadow-sm md:p-10">
         <TeacherForm
           action={boundUpdate}
           defaultValues={teacher}

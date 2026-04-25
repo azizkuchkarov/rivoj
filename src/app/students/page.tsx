@@ -1,10 +1,14 @@
 import Link from "next/link";
 
-import { Users } from "lucide-react";
+import { UserPlus, Users } from "lucide-react";
 
+import { StudentsDataTable } from "@/components/students/StudentsDataTable";
+import type { StudentRow } from "@/components/students/students-columns";
 import { DbUnavailable } from "@/components/teachers/DbUnavailable";
-import { StudentCard } from "@/components/students/StudentCard";
+import { buttonVariants } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
+import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -21,48 +25,47 @@ export default async function StudentsPage() {
     return <DbUnavailable />;
   }
 
+  const rows: StudentRow[] = students.map((s) => ({
+    id: s.id,
+    fullName: s.fullName,
+    isActive: s.isActive,
+    primaryTeacherName: s.primaryTeacher?.fullName ?? null,
+  }));
+
   return (
-    <div className="space-y-10">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="space-y-8">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div className="space-y-2">
-          <p className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-violet-800 ring-1 ring-violet-100">
-            <Users className="h-3.5 w-3.5" aria-hidden />
+          <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-primary">
+            <Users className="size-3.5" aria-hidden />
             Bolalar
           </p>
-          <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--ink)] md:text-4xl">
-            O‘quvchilar
-          </h1>
-          <p className="max-w-xl text-[15px] leading-relaxed text-[var(--muted)]">
-            Markazga qabul qilingan bolalar: vasiy aloqa ma’lumotlari va asosiy o‘qituvchi biriktirish.
+          <h1 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">O‘quvchilar</h1>
+          <p className="max-w-xl text-sm text-muted-foreground md:text-[15px] md:leading-relaxed">
+            Ro‘yxat va qidiruv: vasiy va asosiy o‘qituvchi ustunlarida tez orientatsiya.
           </p>
         </div>
         <Link
           href="/students/new"
-          className="inline-flex shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-purple-700 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-900/25 transition hover:brightness-[1.03]"
+          className={cn(buttonVariants({ size: "lg" }), "inline-flex h-10 shrink-0 items-center gap-2")}
         >
-          + Yangi o‘quvchi
+          <UserPlus className="size-4" aria-hidden />
+          Yangi o‘quvchi
         </Link>
-      </header>
+      </div>
 
       {students.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-violet-200/90 bg-white/50 px-8 py-16 text-center">
-          <p className="font-display text-lg font-medium text-[var(--ink)]">Hozircha o‘quvchilar yo‘q</p>
-          <p className="mt-2 text-sm text-[var(--muted)]">Birinchi kartochkani qo‘shib boshlang.</p>
-          <Link
-            href="/students/new"
-            className="mt-6 inline-flex rounded-full bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-violet-700"
-          >
-            O‘quvchi qo‘shish
-          </Link>
-        </div>
+        <Card className="border-dashed">
+          <CardContent className="py-16 text-center">
+            <p className="font-display text-lg font-medium">Hozircha o‘quvchilar yo‘q</p>
+            <p className="mt-2 text-sm text-muted-foreground">Birinchi yozuvni qo‘shib boshlang.</p>
+            <Link href="/students/new" className={cn(buttonVariants({ size: "lg" }), "mt-6 inline-flex")}>
+              O‘quvchi qo‘shish
+            </Link>
+          </CardContent>
+        </Card>
       ) : (
-        <ul className="grid gap-6 sm:grid-cols-2">
-          {students.map((s) => (
-            <li key={s.id}>
-              <StudentCard student={s} />
-            </li>
-          ))}
-        </ul>
+        <StudentsDataTable data={rows} />
       )}
     </div>
   );

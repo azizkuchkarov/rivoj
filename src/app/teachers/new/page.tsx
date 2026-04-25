@@ -13,7 +13,7 @@ export default async function NewTeacherPage() {
       <div className="space-y-2">
         <Link
           href="/teachers"
-          className="text-sm font-medium text-teal-800/90 underline-offset-4 hover:underline"
+          className="text-sm font-medium text-indigo-800 underline-offset-4 hover:underline"
         >
           ← O‘qituvchilar ro‘yxati
         </Link>
@@ -25,7 +25,7 @@ export default async function NewTeacherPage() {
         </p>
       </div>
 
-      <div className="rounded-[2rem] border border-white/70 bg-[color:var(--surface)] p-6 shadow-xl shadow-black/5 md:p-10">
+      <div className="rounded-[2rem] border border-border bg-[color:var(--surface)] p-6 shadow-sm md:p-10">
         <TeacherForm
           action={createTeacher}
           suggestedListNumber={suggestedListNumber}

@@ -55,7 +55,7 @@ export default async function TeacherDetailPage({ params }: PageProps) {
   return (
     <div className="space-y-8">
       <nav className="text-sm text-[var(--muted)]">
-        <Link href="/teachers" className="font-medium text-teal-800/90 underline-offset-4 hover:underline">
+        <Link href="/teachers" className="font-medium text-indigo-800 underline-offset-4 hover:underline">
           O‘qituvchilar
         </Link>
         <span className="mx-2 text-zinc-300">/</span>

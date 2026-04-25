@@ -8,11 +8,11 @@ import { addDaysUTC, parseDayParam, parseWeekMondayParam, startOfWeekMondayUTC, 
 export const dynamic = "force-dynamic";
 
 type PageProps = {
-  searchParams: Promise<{ week?: string; view?: string; date?: string }>;
+  searchParams: Promise<{ week?: string; view?: string; date?: string; teacherId?: string; startMinutes?: string }>;
 };
 
 export default async function SchedulePage({ searchParams }: PageProps) {
-  const { week, view, date } = await searchParams;
+  const { week, view, date, teacherId, startMinutes } = await searchParams;
   const mode = view === "day" ? "day" : "week";
 
   if (mode === "day") {
@@ -49,6 +49,8 @@ export default async function SchedulePage({ searchParams }: PageProps) {
         lessons={lessons}
         teachers={teachers}
         weekMondayIso={weekMondayIso}
+        selectedTeacherId={teacherId && teachers.some((t) => t.id === teacherId) ? teacherId : undefined}
+        selectedStartMinutes={startMinutes ? Number.parseInt(startMinutes, 10) : undefined}
       />
     );
   }

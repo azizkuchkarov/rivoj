@@ -32,8 +32,8 @@ type TeacherFormProps = {
 
 function fieldClass(err?: string) {
   return cn(
-    "w-full rounded-2xl border bg-white/80 px-4 py-3 text-[var(--ink)] shadow-inner shadow-black/5 outline-none transition placeholder:text-zinc-400 focus:border-teal-300 focus:ring-4 focus:ring-teal-500/15",
-    err ? "border-red-300 focus:border-red-400 focus:ring-red-200/40" : "border-zinc-200/90",
+    "w-full rounded-2xl border bg-white px-4 py-3 text-[var(--ink)] shadow-inner outline-none transition placeholder:text-zinc-400 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-200",
+    err ? "border-red-300 focus:border-red-400 focus:ring-red-200" : "border-zinc-200",
   );
 }
 
@@ -52,7 +52,7 @@ export function TeacherForm({ action, suggestedListNumber, defaultValues, submit
       {state.error ? (
         <div
           role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50/90 px-4 py-3 text-sm text-red-900"
+          className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900"
         >
           {state.error}
         </div>
@@ -199,21 +199,21 @@ export function TeacherForm({ action, suggestedListNumber, defaultValues, submit
           ) : null}
         </div>
 
-        <div className="md:col-span-2 flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/50 px-4 py-3">
+        <div className="md:col-span-2 flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3">
           <input
             id="isActive"
             name="isActive"
             type="checkbox"
             defaultChecked={dv.isActive !== false}
             value="true"
-            className="h-4 w-4 rounded border-zinc-300 text-teal-600 focus:ring-teal-500"
+            className="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500"
           />
           <label htmlFor="isActive" className="text-sm font-medium text-[var(--ink-soft)]">
             O‘qituvchi faol (yangi bolalar biriktiriladi)
           </label>
         </div>
 
-        <div className="md:col-span-2 flex flex-wrap items-center gap-3 rounded-2xl border border-violet-100 bg-violet-50/40 px-4 py-3">
+        <div className="md:col-span-2 flex flex-wrap items-center gap-3 rounded-2xl border border-violet-100 bg-violet-50 px-4 py-3">
           <input
             id="offersConsultation"
             name="offersConsultation"
@@ -232,7 +232,7 @@ export function TeacherForm({ action, suggestedListNumber, defaultValues, submit
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-deep)] px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-900/20 transition hover:brightness-[1.03] disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-deep)] px-8 py-3 text-sm font-semibold text-white shadow-md transition hover:brightness-[1.03] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {pending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
           {submitLabel}

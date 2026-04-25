@@ -19,6 +19,8 @@ type ScheduleDayMatrixViewProps = {
   lessons: LessonWithRelations[];
   teachers: Pick<Teacher, "id" | "fullName" | "listNumber">[];
   weekMondayIso: string;
+  selectedTeacherId?: string;
+  selectedStartMinutes?: number;
 };
 
 function lessonKey(teacherId: string, startMinutes: number) {
@@ -36,18 +38,18 @@ function buildLookup(lessons: LessonWithRelations[]) {
 function dayLessonStatusStyle(L: LessonWithRelations) {
   if (L.attendance === LessonAttendance.PRESENT && L.guardianFee === LessonGuardianFee.PAID) {
     return {
-      card: "border-emerald-300/90 bg-emerald-50/95",
+    card: "border-emerald-300 bg-emerald-50",
       badge: "bg-emerald-200 text-emerald-950",
     };
   }
   if (L.attendance === LessonAttendance.PRESENT && L.guardianFee === LessonGuardianFee.UNPAID) {
     return {
-      card: "border-red-300/90 bg-red-50/95",
+      card: "border-red-300 bg-red-50",
       badge: "bg-red-200 text-red-950",
     };
   }
   return {
-    card: "border-amber-300/90 bg-amber-50/95",
+    card: "border-amber-300 bg-amber-50",
     badge: "bg-amber-200 text-amber-950",
   };
 }
@@ -59,6 +61,8 @@ export function ScheduleDayMatrixView({
   lessons,
   teachers,
   weekMondayIso,
+  selectedTeacherId,
+  selectedStartMinutes,
 }: ScheduleDayMatrixViewProps) {
   const isConsultation = variant === "consultation";
   const dayIso = toISODateStringUTC(day);
@@ -66,6 +70,11 @@ export function ScheduleDayMatrixView({
   const nextDay = toISODateStringUTC(addDaysUTC(day, 1));
   const lookup = buildLookup(lessons);
   const slots = getSlotStartMinutesList();
+  const selectedTeacher = selectedTeacherId ? teachers.find((t) => t.id === selectedTeacherId) ?? null : null;
+  const selectedSlot = typeof selectedStartMinutes === "number" && slots.includes(selectedStartMinutes)
+    ? selectedStartMinutes
+    : null;
+  const navBase = `${basePath}?view=day&date=${encodeURIComponent(dayIso)}`;
 
   const title = new Intl.DateTimeFormat("uz-UZ", {
     weekday: "long",
@@ -81,9 +90,38 @@ export function ScheduleDayMatrixView({
           <h1 className="font-display text-2xl font-semibold tracking-tight text-[var(--ink)] md:text-3xl">
             {isConsultation ? "Konsultatsiya jadvali — kunlik" : "Dars jadvali — kunlik"}
           </h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">
+          <p className="mt-1 text-sm text-black">
             O‘qituvchilar (qatorlar) · dars va konsultatsiya alohida belgilanadi · soatlar (ustunlar) · {title}
           </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+            <span className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 font-semibold text-indigo-900">
+              Vertikal: vaqt ustuni
+            </span>
+            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 font-semibold text-emerald-900">
+              Gorizontal: o‘qituvchi qatori
+            </span>
+            {selectedTeacher || selectedSlot !== null ? (
+              <Link href={navBase} className="rounded-full border border-zinc-200 bg-white px-3 py-1 font-medium text-zinc-700 hover:bg-zinc-50">
+                Navigatorni tozalash
+              </Link>
+            ) : null}
+          </div>
+          {selectedTeacher || selectedSlot !== null ? (
+            <p className="mt-2 text-xs text-zinc-700">
+              Tanlangan:{" "}
+              {selectedTeacher ? (
+                <span className="font-semibold text-emerald-900">№{selectedTeacher.listNumber} {selectedTeacher.fullName}</span>
+              ) : (
+                <span className="font-semibold text-zinc-500">o‘qituvchi tanlanmagan</span>
+              )}
+              {" · "}
+              {selectedSlot !== null ? (
+                <span className="font-semibold text-indigo-900">{formatSlotRangeLabel(selectedSlot)}</span>
+              ) : (
+                <span className="font-semibold text-zinc-500">vaqt tanlanmagan</span>
+              )}
+            </p>
+          ) : null}
         </div>
         <div className="flex w-full min-w-0 flex-nowrap items-center justify-start gap-2 overflow-x-auto pb-0.5 lg:justify-end [-ms-overflow-style:none] [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5">
           <ScheduleViewSwitcher
@@ -94,14 +132,14 @@ export function ScheduleDayMatrixView({
           />
           <Link
             href={`${basePath}?view=day&date=${prevDay}`}
-            className="inline-flex shrink-0 items-center gap-1 rounded-full border border-zinc-200 bg-white/90 px-3 py-2 text-sm font-medium text-[var(--ink-soft)] shadow-sm hover:bg-zinc-50"
+            className="inline-flex shrink-0 items-center gap-1 rounded-full border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-[var(--ink-soft)] hover:bg-zinc-50"
           >
             <ChevronLeft className="h-4 w-4" aria-hidden />
             Oldingi kun
           </Link>
           <Link
             href={`${basePath}?view=day&date=${nextDay}`}
-            className="inline-flex shrink-0 items-center gap-1 rounded-full border border-zinc-200 bg-white/90 px-3 py-2 text-sm font-medium text-[var(--ink-soft)] shadow-sm hover:bg-zinc-50"
+            className="inline-flex shrink-0 items-center gap-1 rounded-full border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-[var(--ink-soft)] hover:bg-zinc-50"
           >
             Keyingi kun
             <ChevronRight className="h-4 w-4" aria-hidden />
@@ -109,7 +147,7 @@ export function ScheduleDayMatrixView({
           {basePath !== SCHEDULE_CONSULTATION_PATH ? (
             <Link
               href={`${basePath}/new`}
-              className="shrink-0 rounded-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-deep)] px-5 py-2 text-sm font-semibold text-white shadow-md hover:brightness-[1.03]"
+              className="shrink-0 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:brightness-[1.03]"
             >
               + Dars qo‘shish
             </Link>
@@ -117,11 +155,11 @@ export function ScheduleDayMatrixView({
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-white/70 bg-[color:var(--surface)] shadow-lg shadow-black/5">
+      <div className="overflow-x-auto rounded-2xl border border-border bg-[color:var(--surface)]">
         <table className="w-full min-w-[720px] border-collapse text-left text-sm">
           <thead>
-            <tr className="border-b border-zinc-200 bg-teal-50/50">
-              <th className="sticky left-0 z-30 min-w-[160px] border-r border-zinc-200 bg-teal-50/98 px-2 py-2 text-xs font-semibold uppercase tracking-wide text-teal-900">
+            <tr className="border-b border-zinc-200 bg-indigo-50">
+              <th className="sticky left-0 z-30 min-w-[160px] border-r border-zinc-200 bg-indigo-50 px-2 py-2 text-xs font-semibold uppercase tracking-wide text-indigo-900">
                 № · O‘qituvchi
               </th>
               {teachers.length === 0 ? (
@@ -134,11 +172,19 @@ export function ScheduleDayMatrixView({
                 slots.map((slotStart) => (
                   <th
                     key={slotStart}
-                    className="min-w-[92px] max-w-[110px] border-l border-zinc-100 px-1 py-2 text-center align-bottom"
+                    className={cn(
+                      "min-w-[92px] max-w-[110px] border-l border-zinc-100 px-1 py-2 text-center align-bottom",
+                      selectedSlot === slotStart && "bg-indigo-100",
+                    )}
                   >
-                    <div className="text-[10px] font-semibold leading-tight text-[var(--ink)]">
-                      {formatSlotRangeLabel(slotStart)}
-                    </div>
+                    <Link
+                      href={`${navBase}${selectedTeacherId ? `&teacherId=${encodeURIComponent(selectedTeacherId)}` : ""}&startMinutes=${slotStart}`}
+                      className="block rounded px-1 py-0.5 hover:bg-indigo-100"
+                    >
+                      <div className="text-[10px] font-semibold leading-tight text-[var(--ink)]">
+                        {formatSlotRangeLabel(slotStart)}
+                      </div>
+                    </Link>
                     <div className="mt-0.5 text-[9px] font-normal text-[var(--muted)]">
                       {formatMinutesAsClock(slotStart)}
                     </div>
@@ -150,13 +196,25 @@ export function ScheduleDayMatrixView({
           <tbody>
             {teachers.length === 0 ? null : (
               teachers.map((t) => (
-                <tr key={t.id} className="border-b border-zinc-100/90 odd:bg-white/40 even:bg-zinc-50/30">
-                  <td className="sticky left-0 z-10 border-r border-zinc-200 bg-white/95 px-2 py-2 align-middle text-xs font-semibold text-teal-900">
+                <tr
+                  key={t.id}
+                  className={cn(
+                    "border-b border-zinc-100 odd:bg-white even:bg-zinc-50",
+                    selectedTeacherId === t.id && "bg-emerald-50",
+                  )}
+                >
+                  <td className={cn(
+                    "sticky left-0 z-10 border-r border-zinc-200 bg-white px-2 py-2 align-middle text-xs font-semibold text-teal-900",
+                    selectedTeacherId === t.id && "bg-emerald-100",
+                  )}>
                     <div className="flex items-start gap-2">
-                      <span className="mt-0.5 inline-flex min-w-[2rem] justify-center rounded-md bg-teal-100 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-teal-900 ring-1 ring-teal-200/80">
+                      <span className="mt-0.5 inline-flex min-w-[2rem] justify-center rounded-md bg-teal-100 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-teal-900 ring-1 ring-teal-200">
                         №{t.listNumber}
                       </span>
-                      <Link href={`/teachers/${t.id}`} className="leading-snug hover:text-teal-950 hover:underline">
+                      <Link
+                        href={`${navBase}${selectedSlot !== null ? `&startMinutes=${selectedSlot}` : ""}&teacherId=${encodeURIComponent(t.id)}`}
+                        className="leading-snug hover:text-teal-950 hover:underline"
+                      >
                         {t.fullName}
                       </Link>
                     </div>
@@ -166,12 +224,18 @@ export function ScheduleDayMatrixView({
                     const isCon = L && L.kind === LessonKind.CONSULTATION;
                     const st = L ? dayLessonStatusStyle(L) : null;
                     return (
-                      <td key={slotStart} className="min-h-[52px] border-l border-zinc-100/80 px-1 py-1 align-top">
+                      <td
+                        key={slotStart}
+                        className={cn(
+                          "min-h-[52px] border-l border-zinc-100 px-1 py-1 align-top",
+                          selectedSlot === slotStart && "bg-indigo-50",
+                        )}
+                      >
                         {L ? (
                           <div
                             className={cn(
-                              "rounded-lg border px-1.5 py-1 text-[10px] leading-snug shadow-sm",
-                              isCon ? "border-violet-300/90 bg-violet-50/95" : st?.card,
+                              "rounded-lg border px-1.5 py-1 text-[10px] leading-snug",
+                              isCon ? "border-violet-300 bg-violet-50" : st?.card,
                             )}
                           >
                             <LessonAttendanceTrigger lesson={L} label={L.student.fullName} />
@@ -183,10 +247,10 @@ export function ScheduleDayMatrixView({
                         ) : (
                           <Link
                             href={`${basePath}/new?lessonDate=${encodeURIComponent(dayIso)}&teacherId=${encodeURIComponent(t.id)}&startMinutes=${slotStart}`}
-                            className="flex min-h-[40px] flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed border-teal-200/90 bg-teal-50/40 px-1 py-1 text-center text-[10px] font-medium text-teal-800 transition hover:border-teal-400 hover:bg-teal-100/70"
+                            className="flex min-h-[40px] flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed border-teal-200 bg-teal-50 px-1 py-1 text-center text-[10px] font-medium text-teal-800 transition hover:border-teal-400 hover:bg-teal-100"
                           >
                             <span className="leading-none">+ Dars</span>
-                            <span className="text-[9px] font-normal text-teal-700/80">qo‘shish</span>
+                            <span className="text-[9px] font-normal text-teal-700">qo‘shish</span>
                           </Link>
                         )}
                       </td>

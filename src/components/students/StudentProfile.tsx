@@ -9,14 +9,20 @@ import {
   type GuardianDebtRow,
 } from "@/components/students/StudentPaymentsSection";
 import { StudentScheduleSection, type StudentProfileLesson } from "@/components/students/StudentScheduleSection";
+import { StudentTelegramTestButton } from "@/components/students/StudentTelegramTestButton";
 import { Avatar } from "@/components/teachers/Avatar";
 import type { Payment, Student, Teacher } from "@/generated/prisma/client";
+import { LessonAttendance, LessonGuardianFee } from "@/generated/prisma/enums";
 import { ageFromDateOfBirth } from "@/lib/age";
 import { formatStudentGender } from "@/lib/student-gender";
 
 type PaymentWithTeacher = Payment & {
   teacher: Pick<Teacher, "id" | "fullName"> | null;
   lesson: {
+    lessonDate: Date;
+    startMinutes: number;
+    attendance: LessonAttendance;
+    guardianFee: LessonGuardianFee;
     teacher: { id: string; fullName: string; listNumber: number };
   } | null;
 };
@@ -61,9 +67,7 @@ export function StudentProfile({
 
   return (
     <div className="space-y-8">
-      <section className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-gradient-to-br from-white via-violet-50/40 to-fuchsia-50/20 p-8 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.45)] md:p-10">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-violet-400/15 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 left-10 h-48 w-48 rounded-full bg-fuchsia-300/15 blur-3xl" />
+      <section className="relative overflow-hidden rounded-[2rem] border border-border bg-white p-8 shadow-sm md:p-10">
 
         <div className="relative flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end">
@@ -71,16 +75,16 @@ export function StudentProfile({
             <div className="min-w-0 space-y-2 pb-0.5">
               <div className="flex flex-wrap items-center gap-2">
                 {student.isActive ? (
-                  <span className="inline-flex items-center rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-900 ring-1 ring-emerald-400/30">
+                  <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-900 ring-1 ring-emerald-300">
                     Faol
                   </span>
                 ) : (
-                  <span className="inline-flex items-center rounded-full bg-zinc-200/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-700">
+                  <span className="inline-flex items-center rounded-full bg-zinc-200 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-zinc-700">
                     Nofaol
                   </span>
                 )}
                 {age !== null ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-violet-950 ring-1 ring-violet-100">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-medium text-violet-950 ring-1 ring-violet-100">
                     <Baby className="h-3.5 w-3.5" aria-hidden />
                     {age} yosh
                   </span>
@@ -97,11 +101,12 @@ export function StudentProfile({
           <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
             <Link
               href={`/students/${student.id}/edit`}
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full border border-violet-200/80 bg-white/90 px-5 py-2.5 text-sm font-semibold text-violet-900 shadow-sm transition hover:border-violet-300 hover:bg-violet-50"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full border border-violet-200 bg-white px-5 py-2.5 text-sm font-semibold text-violet-900 shadow-sm transition hover:border-violet-300 hover:bg-violet-50"
             >
               <Pencil className="h-4 w-4" aria-hidden />
               Profilni tahrirlash
             </Link>
+            <StudentTelegramTestButton studentId={student.id} />
             <DeleteConfirmForm
               action={deleteStudent}
               id={student.id}
@@ -116,7 +121,7 @@ export function StudentProfile({
             {student.focusAreas.map((s) => (
               <li
                 key={s}
-                className="rounded-full bg-white/90 px-4 py-1.5 text-sm font-medium text-violet-950 ring-1 ring-violet-100 shadow-sm"
+                className="rounded-full bg-white px-4 py-1.5 text-sm font-medium text-violet-950 ring-1 ring-violet-100 shadow-sm"
               >
                 {s}
               </li>
@@ -172,7 +177,7 @@ export function StudentProfile({
       />
 
       {student.notes?.trim() ? (
-        <div className="h-full rounded-3xl border border-white/60 bg-[color:var(--surface)] p-8 shadow-lg shadow-black/5">
+        <div className="h-full rounded-3xl border border-border bg-[color:var(--surface)] p-8 shadow-sm">
           <h2 className="text-lg font-semibold text-[var(--ink)]">Izoh</h2>
           <p className="mt-4 whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--ink-soft)]">
             {student.notes.trim()}

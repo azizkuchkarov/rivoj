@@ -29,7 +29,7 @@ export function Avatar({ name, photoUrl, size = "md", className }: AvatarProps) 
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-deep)] font-semibold text-white shadow-[0_12px_40px_-12px_rgba(15,118,110,0.55)] ring-2 ring-white/70",
+        "relative overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-deep)] font-semibold text-white shadow-sm ring-1 ring-border",
         sizes[size],
         className,
       )}

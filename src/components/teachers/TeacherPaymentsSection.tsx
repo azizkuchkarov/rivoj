@@ -33,7 +33,7 @@ export function TeacherPaymentsSection({
     .map(([dateIso, amountSom]) => ({ dateIso, amountSom }));
 
   return (
-    <section className="rounded-3xl border border-white/60 bg-[color:var(--surface)] p-6 shadow-lg shadow-black/5 md:p-8">
+    <section className="rounded-3xl border border-border bg-[color:var(--surface)] p-6 shadow-sm md:p-8">
       <div className="space-y-1">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-[var(--ink)]">
           <Banknote className="h-5 w-5 text-teal-600" aria-hidden />
@@ -55,7 +55,7 @@ export function TeacherPaymentsSection({
         ) : null}
       </div>
 
-      <div className="mt-5 rounded-2xl border border-zinc-100/90 bg-white/50 p-4">
+      <div className="mt-5 rounded-2xl border border-zinc-100 bg-white p-4">
         <h3 className="text-sm font-semibold text-[var(--ink)]">Har kunlik umumiy summa</h3>
         {dailyTotalRows.length === 0 ? (
           <p className="mt-2 text-sm text-[var(--muted)]">Hozircha kunlik umumiy yozuv yo‘q.</p>
@@ -63,7 +63,7 @@ export function TeacherPaymentsSection({
           <div className="mt-3 overflow-x-auto rounded-xl border border-zinc-100">
             <table className="w-full min-w-[360px] text-left text-sm">
               <thead>
-                <tr className="border-b border-zinc-200 bg-zinc-50/70">
+                <tr className="border-b border-zinc-200 bg-zinc-50">
                   <th className="px-3 py-2.5 font-semibold text-zinc-700">Sana</th>
                   <th className="px-3 py-2.5 font-semibold text-zinc-700">Kunlik jami ulush</th>
                 </tr>
@@ -76,7 +76,7 @@ export function TeacherPaymentsSection({
                     year: "numeric",
                   }).format(new Date(`${r.dateIso}T12:00:00.000Z`));
                   return (
-                    <tr key={r.dateIso} className="border-b border-zinc-100/90 last:border-0">
+                    <tr key={r.dateIso} className="border-b border-zinc-100 last:border-0">
                       <td className="px-3 py-2.5 text-[var(--ink-soft)]">{dateLabel}</td>
                       <td className="px-3 py-2.5 font-semibold tabular-nums text-teal-900">
                         {formatSomUZS(r.amountSom)} so‘m
@@ -91,14 +91,14 @@ export function TeacherPaymentsSection({
       </div>
 
       {payments.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-dashed border-teal-200/90 bg-teal-50/30 px-6 py-10 text-center text-sm text-[var(--muted)]">
+        <div className="mt-6 rounded-2xl border border-dashed border-indigo-200 bg-indigo-50 px-6 py-10 text-center text-sm text-[var(--muted)]">
           Hozircha sizga biriktirilgan to‘lov yozuvlari yo‘q.
         </div>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-2xl border border-zinc-100/90">
+        <div className="mt-6 overflow-x-auto rounded-2xl border border-zinc-100">
           <table className="w-full min-w-[820px] text-left text-sm">
             <thead>
-              <tr className="border-b border-zinc-200 bg-teal-50/80">
+              <tr className="border-b border-zinc-200 bg-indigo-50">
                 <th className="px-3 py-2.5 font-semibold text-zinc-700">Sana</th>
                 <th className="px-3 py-2.5 font-semibold text-zinc-700">O‘quvchi</th>
                 <th className="px-3 py-2.5 font-semibold text-zinc-700">Tur</th>
@@ -119,7 +119,7 @@ export function TeacherPaymentsSection({
                 const share = p.teacherShareSom ?? 0;
                 const detail = paymentTeacherShareDetail(p);
                 return (
-                  <tr key={p.id} className="border-b border-zinc-100/90 odd:bg-white/50">
+                  <tr key={p.id} className="border-b border-zinc-100 odd:bg-white">
                     <td className="whitespace-nowrap px-3 py-2.5 text-[var(--ink-soft)]">{paid}</td>
                     <td className="max-w-[160px] px-3 py-2.5">
                       <Link

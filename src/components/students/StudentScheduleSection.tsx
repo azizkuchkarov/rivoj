@@ -71,8 +71,8 @@ function LessonCard({ L, showDayHeading = true }: { L: StudentProfileLesson; sho
   return (
     <div
       className={cn(
-        "flex flex-col gap-4 rounded-2xl border bg-white/90 p-4 shadow-sm ring-1 transition sm:flex-row sm:items-center sm:justify-between",
-        "border-zinc-100/90 ring-black/[0.03] hover:border-teal-200/70 hover:bg-teal-50/25 hover:ring-teal-200/40",
+        "flex flex-col gap-4 rounded-2xl border bg-white p-4 shadow-sm ring-1 transition sm:flex-row sm:items-center sm:justify-between",
+        "border-zinc-100 ring-zinc-100 hover:border-indigo-200 hover:bg-indigo-50 hover:ring-indigo-200",
       )}
     >
       <div className="flex min-w-0 flex-1 items-start gap-4">
@@ -82,7 +82,7 @@ function LessonCard({ L, showDayHeading = true }: { L: StudentProfileLesson; sho
               <p className="text-sm font-semibold leading-snug text-[var(--ink)]">{dayLabel}</p>
             ) : null}
             <div className={cn("flex flex-wrap items-center gap-2", showDayHeading && "mt-1.5")}>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100/90 px-2.5 py-0.5 text-xs font-medium tabular-nums text-zinc-800 ring-1 ring-zinc-200/80">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium tabular-nums text-zinc-800 ring-1 ring-zinc-200">
                 <Clock className="h-3.5 w-3.5 text-zinc-500" aria-hidden />
                 {timeRange}
               </span>
@@ -137,18 +137,16 @@ export function StudentScheduleSection({ lessons }: StudentScheduleSectionProps)
   const hiddenLessonTotal = hiddenGroups.reduce((n, g) => n + g.items.length, 0);
 
   return (
-    <section className="relative overflow-hidden rounded-[1.75rem] border border-teal-200/50 bg-gradient-to-br from-teal-50/40 via-white to-white p-[1px] shadow-[0_24px_60px_-28px_rgba(13,148,136,0.28)]">
+    <section className="relative overflow-hidden rounded-[1.75rem] border border-border bg-white p-[1px] shadow-sm">
       <div className="relative rounded-[1.7rem] bg-[color:var(--surface)] px-5 py-6 md:px-8 md:py-7">
-        <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-teal-400/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-8 left-1/4 h-32 w-32 rounded-full bg-emerald-300/10 blur-3xl" />
 
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex gap-4">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500/15 to-emerald-500/10 text-teal-800 ring-1 ring-teal-200/70 shadow-inner shadow-teal-900/5">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-800 ring-1 ring-indigo-200 shadow-inner">
               <CalendarClock className="h-6 w-6" aria-hidden />
             </span>
             <div className="min-w-0 space-y-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-teal-800/80">Reja</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-800">Reja</p>
               <h2 className="font-display text-xl font-semibold tracking-tight text-[var(--ink)] md:text-2xl">
                 Dars jadvali
               </h2>
@@ -159,7 +157,7 @@ export function StudentScheduleSection({ lessons }: StudentScheduleSectionProps)
           </div>
           <Link
             href={SCHEDULE_LESSON_PATH}
-            className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-full border border-teal-200/90 bg-white px-5 py-2.5 text-sm font-semibold text-teal-900 shadow-sm ring-1 ring-teal-100/80 transition hover:border-teal-300 hover:bg-teal-50/90"
+            className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-full border border-indigo-200 bg-white px-5 py-2.5 text-sm font-semibold text-indigo-900 shadow-sm ring-1 ring-indigo-100 transition hover:border-indigo-300 hover:bg-indigo-50"
           >
             Umumiy jadval
             <ExternalLink className="h-4 w-4 opacity-70" aria-hidden />
@@ -167,8 +165,8 @@ export function StudentScheduleSection({ lessons }: StudentScheduleSectionProps)
         </div>
 
         {lessons.length === 0 ? (
-          <div className="relative mt-8 rounded-2xl border border-dashed border-teal-200/80 bg-gradient-to-b from-teal-50/50 to-white/60 px-6 py-12 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-100/90 text-teal-800 ring-1 ring-teal-200/80">
+          <div className="relative mt-8 rounded-2xl border border-dashed border-indigo-200 bg-indigo-50 px-6 py-12 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-800 ring-1 ring-indigo-200">
               <CalendarClock className="h-7 w-7 opacity-90" aria-hidden />
             </div>
             <p className="mt-5 font-medium text-[var(--ink)]">Kelajakdagi darslar hozircha yo‘q</p>
@@ -184,7 +182,7 @@ export function StudentScheduleSection({ lessons }: StudentScheduleSectionProps)
           <div className="relative mt-8 space-y-8">
             {visibleGroups.map((group) => (
               <div key={group.dayIso} className="space-y-3">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-teal-800/90">{group.dayLabel}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-indigo-800">{group.dayLabel}</p>
                 <ul className="space-y-3">
                   {group.items.map((L) => (
                     <li key={L.id}>
@@ -196,23 +194,23 @@ export function StudentScheduleSection({ lessons }: StudentScheduleSectionProps)
             ))}
 
             {hiddenGroups.length > 0 ? (
-              <details className="group rounded-2xl border border-teal-200/70 bg-teal-50/20 ring-1 ring-teal-100/60 open:bg-teal-50/35">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-4 py-3.5 text-sm font-semibold text-teal-950 transition hover:bg-teal-100/40 [&::-webkit-details-marker]:hidden">
+              <details className="group rounded-2xl border border-indigo-200 bg-indigo-50 ring-1 ring-indigo-100 open:bg-indigo-100">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-4 py-3.5 text-sm font-semibold text-indigo-950 transition hover:bg-indigo-100 [&::-webkit-details-marker]:hidden">
                   <span>
                     Boshqa kunlar{" "}
-                    <span className="font-medium text-teal-800/90">
+                    <span className="font-medium text-indigo-800">
                       ({hiddenGroups.length} kun · {hiddenLessonTotal} dars)
                     </span>
                   </span>
                   <ChevronDown
-                    className="h-5 w-5 shrink-0 text-teal-700 transition duration-200 group-open:rotate-180"
+                    className="h-5 w-5 shrink-0 text-indigo-700 transition duration-200 group-open:rotate-180"
                     aria-hidden
                   />
                 </summary>
-                <div className="space-y-6 border-t border-teal-100/80 px-4 pb-4 pt-2">
+                <div className="space-y-6 border-t border-indigo-100 px-4 pb-4 pt-2">
                   {hiddenGroups.map((group) => (
                     <div key={group.dayIso} className="space-y-3 pt-2 first:pt-0">
-                      <p className="text-[11px] font-semibold uppercase tracking-wide text-teal-800/85">{group.dayLabel}</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-indigo-800">{group.dayLabel}</p>
                       <ul className="space-y-3">
                         {group.items.map((L) => (
                           <li key={L.id}>

@@ -37,13 +37,13 @@ export default async function EditStudentPage({ params }: PageProps) {
     <div className="space-y-8">
       <div className="space-y-2">
         <nav className="text-sm text-[var(--muted)]">
-          <Link href="/students" className="font-medium text-violet-800/90 underline-offset-4 hover:underline">
+          <Link href="/students" className="font-medium text-violet-800 underline-offset-4 hover:underline">
             O‘quvchilar
           </Link>
           <span className="mx-2 text-zinc-300">/</span>
           <Link
             href={`/students/${student.id}`}
-            className="font-medium text-violet-800/90 underline-offset-4 hover:underline"
+            className="font-medium text-violet-800 underline-offset-4 hover:underline"
           >
             {student.fullName}
           </Link>
@@ -56,7 +56,7 @@ export default async function EditStudentPage({ params }: PageProps) {
         <p className="text-[15px] text-[var(--muted)]">Saqlangach profil sahifasiga qaytadi.</p>
       </div>
 
-      <div className="rounded-[2rem] border border-white/70 bg-[color:var(--surface)] p-6 shadow-xl shadow-black/5 md:p-10">
+      <div className="rounded-[2rem] border border-border bg-[color:var(--surface)] p-6 shadow-sm md:p-10">
         <StudentForm
           action={boundUpdate}
           teachers={teachers}

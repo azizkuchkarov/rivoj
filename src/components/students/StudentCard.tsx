@@ -23,11 +23,11 @@ export function StudentCard({ student }: StudentCardProps) {
     <Link
       href={`/students/${student.id}`}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-3xl border border-white/60 bg-[color:var(--surface)] p-6 shadow-[0_20px_60px_-28px_rgba(15,23,42,0.35)] transition duration-300",
-        "hover:-translate-y-0.5 hover:border-violet-200/90 hover:shadow-[0_28px_70px_-30px_rgba(109,40,217,0.35)]",
+        "group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-[color:var(--surface)] p-6 shadow-sm transition duration-300",
+        "hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-md",
       )}
     >
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/80 via-transparent to-violet-50/50 opacity-0 transition group-hover:opacity-100" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white via-transparent to-violet-50 opacity-0 transition group-hover:opacity-100" />
       <div className="relative flex items-start gap-4">
         <Avatar name={student.fullName} size="lg" />
         <div className="min-w-0 flex-1">
@@ -49,7 +49,7 @@ export function StudentCard({ student }: StudentCardProps) {
                 </span>
               </p>
             </div>
-            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white/80 text-violet-700 shadow-sm ring-1 ring-black/5 transition group-hover:bg-violet-50">
+            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white text-violet-700 shadow-sm ring-1 ring-border transition group-hover:bg-violet-50">
               <ArrowUpRight className="h-4 w-4" aria-hidden />
             </span>
           </div>
@@ -59,12 +59,12 @@ export function StudentCard({ student }: StudentCardProps) {
                 Faol
               </span>
             ) : (
-              <span className="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-600 ring-1 ring-zinc-200/80">
+              <span className="inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-zinc-600 ring-1 ring-zinc-200">
                 Nofaol
               </span>
             )}
             {student.primaryTeacher ? (
-              <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-violet-50/90 px-2.5 py-0.5 text-[11px] font-medium text-violet-900 ring-1 ring-violet-100">
+              <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-violet-50 px-2.5 py-0.5 text-[11px] font-medium text-violet-900 ring-1 ring-violet-100">
                 <GraduationCap className="h-3.5 w-3.5 shrink-0" aria-hidden />
                 <span className="truncate">{student.primaryTeacher.fullName}</span>
               </span>
@@ -77,7 +77,7 @@ export function StudentCard({ student }: StudentCardProps) {
           {topFocus.map((s) => (
             <li
               key={s}
-              className="rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-violet-950/90 ring-1 ring-violet-100"
+              className="rounded-full bg-white px-3 py-1 text-xs font-medium text-violet-950 ring-1 ring-violet-100"
             >
               {s}
             </li>
@@ -91,16 +91,16 @@ export function StudentCard({ student }: StudentCardProps) {
       ) : (
         <p className="relative mt-5 text-sm text-[var(--muted)]">Yo‘nalishlar keyinroq kiritiladi.</p>
       )}
-      <div className="relative mt-6 space-y-2 border-t border-white/60 pt-4 text-sm text-[var(--muted)]">
+      <div className="relative mt-6 space-y-2 border-t border-border pt-4 text-sm text-[var(--muted)]">
         {student.guardianName ? (
           <p className="flex items-center gap-2 truncate">
-            <User className="h-4 w-4 shrink-0 text-violet-700/80" aria-hidden />
+            <User className="h-4 w-4 shrink-0 text-violet-700" aria-hidden />
             <span className="truncate">{student.guardianName}</span>
           </p>
         ) : null}
         {student.guardianPhone ? (
           <p className="flex items-center gap-2 truncate">
-            <Phone className="h-4 w-4 shrink-0 text-violet-700/80" aria-hidden />
+            <Phone className="h-4 w-4 shrink-0 text-violet-700" aria-hidden />
             <span className="truncate">{student.guardianPhone}</span>
           </p>
         ) : null}

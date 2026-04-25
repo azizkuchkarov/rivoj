@@ -147,6 +147,7 @@ export function PaymentForm({
             required
             min={1000}
             step={1000}
+            onWheel={(e) => e.currentTarget.blur()}
             placeholder={kind === PaymentKind.DAILY ? "100000" : "1000000"}
             className={fieldClass(state.fieldErrors?.amountSom)}
           />
@@ -203,6 +204,7 @@ export function PaymentForm({
                 required
                 min={0}
                 step={1000}
+                onWheel={(e) => e.currentTarget.blur()}
                 placeholder="50000"
                 className={fieldClass(state.fieldErrors?.teacherShareSom)}
               />
@@ -231,6 +233,7 @@ export function PaymentForm({
                 min={1}
                 max={2000}
                 step={1}
+                onWheel={(e) => e.currentTarget.blur()}
                 placeholder="12"
                 value={subLessons}
                 onChange={(e) => setSubLessons(e.target.value)}
@@ -254,6 +257,7 @@ export function PaymentForm({
                 required
                 min={0}
                 step={1000}
+                onWheel={(e) => e.currentTarget.blur()}
                 placeholder="50000"
                 value={subPerLesson}
                 onChange={(e) => setSubPerLesson(e.target.value)}

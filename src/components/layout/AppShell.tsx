@@ -1,21 +1,26 @@
 import type { ReactNode } from "react";
+import { headers } from "next/headers";
 
+import { AppSidebar } from "@/components/layout/AppSidebar";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { getCurrentRole } from "@/lib/auth";
 
-export function AppShell({ children }: { children: ReactNode }) {
+export async function AppShell({ children }: { children: ReactNode }) {
+  const h = await headers();
+  const pathname = h.get("x-pathname") ?? "";
+  if (pathname === "/login") {
+    return <>{children}</>;
+  }
+
+  const role = (await getCurrentRole()) ?? "manager";
   return (
-    <div className="relative flex min-h-full flex-1 flex-col">
-      <div
-        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
-        aria-hidden
-      >
-        <div className="absolute -left-24 -top-24 h-80 w-80 rounded-full bg-[radial-gradient(circle_at_center,rgba(45,212,191,0.35),transparent_65%)] blur-2xl" />
-        <div className="absolute -right-20 top-40 h-96 w-96 rounded-full bg-[radial-gradient(circle_at_center,rgba(251,191,36,0.22),transparent_68%)] blur-2xl" />
-        <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.12),transparent_70%)] blur-2xl" />
-      </div>
-      <SiteHeader />
-      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
-        {children}
+    <div className="flex min-h-full flex-1">
+      <AppSidebar className="hidden lg:flex" role={role} />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <SiteHeader />
+        <main className="flex-1 px-4 py-6 md:px-8 md:py-8 lg:px-10">
+          <div className="mx-auto w-full max-w-7xl">{children}</div>
+        </main>
       </div>
     </div>
   );

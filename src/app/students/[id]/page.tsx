@@ -45,6 +45,10 @@ export default async function StudentDetailPage({ params }: PageProps) {
           teacher: { select: { id: true, fullName: true } },
           lesson: {
             select: {
+              lessonDate: true,
+              startMinutes: true,
+              attendance: true,
+              guardianFee: true,
               teacher: { select: { id: true, fullName: true, listNumber: true } },
             },
           },
