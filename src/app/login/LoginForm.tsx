@@ -13,7 +13,7 @@ export function LoginForm() {
     <form action={formAction} className="mx-auto w-full max-w-md space-y-5 rounded-2xl border border-border bg-white p-6 shadow-sm">
       <div>
         <h1 className="text-2xl font-semibold text-[var(--ink)]">Tizimga kirish</h1>
-        <p className="mt-1 text-sm text-[var(--muted)]">Manager yoki admin login/parolini kiriting.</p>
+        <p className="mt-1 text-sm text-black">Manager yoki admin login/parolini kiriting.</p>
       </div>
 
       <div className="space-y-2">

@@ -90,7 +90,7 @@ export function ConsultationIntakeForm({ teachers, defaultDate }: ConsultationIn
 
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-[var(--ink)]">1. Yangi o‘quvchi</h2>
-        <p className="text-sm text-[var(--muted)]">
+        <p className="text-sm text-black">
           Konsultatsiyaga kelgan har bir bola uchun yangi kartochka yaratiladi.
         </p>
         <div className="grid gap-4 md:grid-cols-2">
@@ -187,10 +187,10 @@ export function ConsultationIntakeForm({ teachers, defaultDate }: ConsultationIn
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="text-lg font-semibold text-[var(--ink)]">3. O‘qituvchining bandligi (dars jadvali + konsultatsiyalar)</h2>
             {loadingSchedule ? (
-              <span className="text-xs text-[var(--muted)]">Yuklanmoqda…</span>
+              <span className="text-xs text-black">Yuklanmoqda…</span>
             ) : null}
           </div>
-          <p className="text-sm text-[var(--muted)]">
+          <p className="text-sm text-black">
             Quyida tanlangan kunda o‘qituvchining barcha dars va konsultatsiya yozuvlari ko‘rinadi. Bo‘sh slotlardan birini tanlab
             konsultatsiya vaqtini belgilang.
           </p>
@@ -202,7 +202,7 @@ export function ConsultationIntakeForm({ teachers, defaultDate }: ConsultationIn
           ) : null}
 
           {!loadingSchedule && blocks.length === 0 ? (
-            <p className="text-sm text-[var(--muted)]">Bu kunda hali band yozuvlar yo‘q — barcha soatli slotlar bo‘sh deb hisoblanadi.</p>
+            <p className="text-sm text-black">Bu kunda hali band yozuvlar yo‘q — barcha soatli slotlar bo‘sh deb hisoblanadi.</p>
           ) : null}
 
           {blocks.length > 0 ? (
@@ -305,7 +305,7 @@ export function ConsultationIntakeForm({ teachers, defaultDate }: ConsultationIn
         Konsultatsiyani saqlash
       </button>
       {!selectedStart && teacherId && lessonDate && !loadingSchedule ? (
-        <p className="text-xs text-[var(--muted)]">Davom etish uchun yuqoridagi bo‘sh slotlardan birini tanlang.</p>
+        <p className="text-xs text-black">Davom etish uchun yuqoridagi bo‘sh slotlardan birini tanlang.</p>
       ) : null}
     </form>
   );

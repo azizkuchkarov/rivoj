@@ -167,7 +167,7 @@ export function StudentPaymentsSection({
               <h2 className="font-display text-xl font-semibold tracking-tight text-[var(--ink)] md:text-2xl">
                 To‘lovlar
               </h2>
-              <p className="max-w-md text-sm leading-relaxed text-[var(--muted)]">
+              <p className="max-w-md text-sm leading-relaxed text-black">
                 To‘lovlar ikki bo‘limda: «To‘lov qilinganlar» va «Qarzdorlik». Bir martalik (kunlik) to‘lov bilan
                 5-6 ta dars qo‘shilsa ham har biri alohida qatorda ko‘rinadi.
               </p>
@@ -224,7 +224,7 @@ export function StudentPaymentsSection({
               <Banknote className="h-7 w-7 opacity-90" aria-hidden />
             </div>
             <p className="mt-5 font-medium text-[var(--ink)]">Hozircha yozuvlar yo‘q</p>
-            <p className="mt-2 text-sm text-[var(--muted)]">
+            <p className="mt-2 text-sm text-black">
               Yangi to‘lovni{" "}
               <Link href="/payments" className="font-medium text-violet-800 underline-offset-4 hover:underline">
                 To‘lovlar
@@ -245,7 +245,7 @@ export function StudentPaymentsSection({
                 </h3>
               </div>
               {paidSectionPayments.length === 0 ? (
-                <p className="px-4 py-6 text-sm text-[var(--muted)]">Hozircha to‘lov qilingan darslar yo‘q.</p>
+                <p className="px-4 py-6 text-sm text-black">Hozircha to‘lov qilingan darslar yo‘q.</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[860px] text-left text-sm">
@@ -297,7 +297,7 @@ export function StudentPaymentsSection({
                               {paymentMethodLabel(p.method)}
                             </td>
                             <td className="whitespace-nowrap px-4 py-3">{paymentStatusBadge(p)}</td>
-                            <td className="max-w-[180px] truncate px-4 py-3 text-[var(--muted)]" title={p.description ?? ""}>
+                            <td className="max-w-[180px] truncate px-4 py-3 text-black" title={p.description ?? ""}>
                               {p.description ?? "—"}
                             </td>
                             <td className="px-1 py-2">
@@ -326,7 +326,7 @@ export function StudentPaymentsSection({
                 </h3>
               </div>
               {sortedDebts.length === 0 ? (
-                <p className="px-4 py-6 text-sm text-[var(--muted)]">Qarzdorlik yo‘q.</p>
+                <p className="px-4 py-6 text-sm text-black">Qarzdorlik yo‘q.</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[820px] text-left text-sm">

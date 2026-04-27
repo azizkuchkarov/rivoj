@@ -94,7 +94,7 @@ export function StudentProfile({
                 {student.fullName}
               </h1>
               {genderLabel ? (
-                <p className="text-lg text-[var(--muted)]">{genderLabel}</p>
+                <p className="text-lg text-black">{genderLabel}</p>
               ) : null}
             </div>
           </div>

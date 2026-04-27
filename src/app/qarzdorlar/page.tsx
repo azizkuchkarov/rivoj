@@ -120,7 +120,7 @@ export default async function DebtorsPage() {
 
       <div className="overflow-hidden rounded-2xl border border-border bg-white">
         {rows.length === 0 ? (
-          <p className="px-5 py-8 text-sm text-[var(--muted)]">Hozircha qarzdorlar yo‘q.</p>
+          <p className="px-5 py-8 text-sm text-black">Hozircha qarzdorlar yo‘q.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[980px] text-left text-sm">

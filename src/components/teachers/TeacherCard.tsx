@@ -52,7 +52,7 @@ export function TeacherCard({ teacher }: TeacherCardProps) {
                 ) : null}
               </div>
               {teacher.title ? (
-                <p className="mt-0.5 flex items-center gap-1.5 text-sm text-[var(--muted)]">
+                <p className="mt-0.5 flex items-center gap-1.5 text-sm text-black">
                   <Briefcase className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden />
                   <span className="truncate">{teacher.title}</span>
                 </p>
@@ -115,9 +115,9 @@ export function TeacherCard({ teacher }: TeacherCardProps) {
           ) : null}
         </ul>
       ) : (
-        <p className="relative mt-5 text-sm text-[var(--muted)]">Mutaxassisliklar hali kiritilmagan.</p>
+        <p className="relative mt-5 text-sm text-black">Mutaxassisliklar hali kiritilmagan.</p>
       )}
-      <div className="relative mt-6 space-y-2 border-t border-border pt-4 text-sm text-[var(--muted)]">
+      <div className="relative mt-6 space-y-2 border-t border-border pt-4 text-sm text-black">
         {teacher.phone ? (
           <p className="flex items-center gap-2 truncate">
             <Phone className="h-4 w-4 shrink-0 text-indigo-700" aria-hidden />

@@ -20,7 +20,7 @@ export default async function NewTeacherPage() {
         <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--ink)] md:text-4xl">
           Yangi o‘qituvchi profili
         </h1>
-        <p className="max-w-2xl text-[15px] leading-relaxed text-[var(--muted)]">
+        <p className="max-w-2xl text-[15px] leading-relaxed text-black">
           № raqami ro‘yxat va dars jadvalida tartibni belgilaydi. Takroriy raqam kiritib bo‘lmaydi.
         </p>
       </div>

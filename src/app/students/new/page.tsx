@@ -30,7 +30,7 @@ export default async function NewStudentPage() {
         <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--ink)] md:text-4xl">
           Yangi o‘quvchi
         </h1>
-        <p className="max-w-2xl text-[15px] leading-relaxed text-[var(--muted)]">
+        <p className="max-w-2xl text-[15px] leading-relaxed text-black">
           Ma’lumotlarni to‘ldirib boring — keyin jadval va uchrashuvlar bilan bog‘lash oson bo‘ladi.
         </p>
       </div>

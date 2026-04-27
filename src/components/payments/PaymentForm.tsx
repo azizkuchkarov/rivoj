@@ -208,7 +208,7 @@ export function PaymentForm({
                 placeholder="50000"
                 className={fieldClass(state.fieldErrors?.teacherShareSom)}
               />
-              <p className="mt-1.5 text-xs text-[var(--muted)]">
+              <p className="mt-1.5 text-xs text-black">
                 Masalan: bola 190 000 so‘m to‘lasa, o‘qituvchiga 80 000 so‘m yoziladi.
               </p>
               {state.fieldErrors?.teacherShareSom ? (
@@ -281,7 +281,7 @@ export function PaymentForm({
                   </span>
                 </p>
               ) : (
-                <p className="text-[var(--muted)]">Darslar soni va dars narxini kiriting.</p>
+                <p className="text-black">Darslar soni va dars narxini kiriting.</p>
               )}
             </div>
           </>

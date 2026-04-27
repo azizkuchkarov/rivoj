@@ -163,7 +163,7 @@ export function ScheduleDayMatrixView({
                 № · O‘qituvchi
               </th>
               {teachers.length === 0 ? (
-                <th className="px-3 py-3 text-xs font-medium text-[var(--muted)]">
+                <th className="px-3 py-3 text-xs font-medium text-black">
                   {isConsultation
                     ? "Konsultatsiya uchun belgilangan faol o‘qituvchi yo‘q — profilda «konsultatsiya»ni yoqing."
                     : "Faol o‘qituvchi yo‘q — avval o‘qituvchi qo‘shing."}
@@ -185,7 +185,7 @@ export function ScheduleDayMatrixView({
                         {formatSlotRangeLabel(slotStart)}
                       </div>
                     </Link>
-                    <div className="mt-0.5 text-[9px] font-normal text-[var(--muted)]">
+                    <div className="mt-0.5 text-[9px] font-normal text-black">
                       {formatMinutesAsClock(slotStart)}
                     </div>
                   </th>

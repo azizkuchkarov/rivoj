@@ -36,7 +36,7 @@ export function StudentCard({ student }: StudentCardProps) {
               <h2 className="truncate text-lg font-semibold tracking-tight text-[var(--ink)]">
                 {student.fullName}
               </h2>
-              <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[var(--muted)]">
+              <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-black">
                 <span className="inline-flex items-center gap-1">
                   <Baby className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden />
                   {age !== null ? (
@@ -89,9 +89,9 @@ export function StudentCard({ student }: StudentCardProps) {
           ) : null}
         </ul>
       ) : (
-        <p className="relative mt-5 text-sm text-[var(--muted)]">Yo‘nalishlar keyinroq kiritiladi.</p>
+        <p className="relative mt-5 text-sm text-black">Yo‘nalishlar keyinroq kiritiladi.</p>
       )}
-      <div className="relative mt-6 space-y-2 border-t border-border pt-4 text-sm text-[var(--muted)]">
+      <div className="relative mt-6 space-y-2 border-t border-border pt-4 text-sm text-black">
         {student.guardianName ? (
           <p className="flex items-center gap-2 truncate">
             <User className="h-4 w-4 shrink-0 text-violet-700" aria-hidden />

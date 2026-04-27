@@ -64,7 +64,7 @@ export function TeacherProfile({
                 {teacher.fullName}
               </h1>
               {teacher.title ? (
-                <p className="text-lg text-[var(--muted)]">{teacher.title}</p>
+                <p className="text-lg text-black">{teacher.title}</p>
               ) : null}
             </div>
           </div>

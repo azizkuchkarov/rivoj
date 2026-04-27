@@ -73,7 +73,7 @@ export function TeacherForm({ action, suggestedListNumber, defaultValues, submit
             defaultValue={listNumberDefault}
             className={fieldClass(state.fieldErrors?.listNumber)}
           />
-          <p className="mt-1.5 text-xs text-[var(--muted)]">
+          <p className="mt-1.5 text-xs text-black">
             Ro‘yxat va jadvalda shu raqam bo‘yicha tartiblanadi. № ni o‘zgartirsangiz, oralig‘dagi boshqa
             o‘qituvchilar avtomatik siljiydi (masalan, 7 → 1: 1–6 lar ketma-ket 2–7 ga o‘tadi).
           </p>
@@ -157,7 +157,7 @@ export function TeacherForm({ action, suggestedListNumber, defaultValues, submit
             className={fieldClass(state.fieldErrors?.telegramChatId)}
             placeholder="123456789"
           />
-          <p className="mt-1.5 text-xs text-[var(--muted)]">
+          <p className="mt-1.5 text-xs text-black">
             O‘qituvchi botga /start berganidan keyin chiqqan chat/user ID ni kiriting.
           </p>
           {state.fieldErrors?.telegramChatId ? (

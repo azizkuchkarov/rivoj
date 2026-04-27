@@ -27,7 +27,7 @@ export function SystemProfileCard({ role, title, description, defaultValues }: S
       <input type="hidden" name="role" value={role} />
       <div className="space-y-1">
         <h2 className="text-lg font-semibold text-[var(--ink)]">{title}</h2>
-        <p className="text-sm text-[var(--muted)]">{description}</p>
+        <p className="text-sm text-black">{description}</p>
       </div>
 
       <div className="mt-4 space-y-4">

@@ -31,7 +31,7 @@ export default async function ProfilesPage() {
     <div className="space-y-6">
       <header className="rounded-3xl border border-border bg-[color:var(--surface)] p-6 shadow-sm">
         <h1 className="text-2xl font-semibold text-[var(--ink)] md:text-3xl">Profillar</h1>
-        <p className="mt-1 text-sm text-[var(--muted)]">
+        <p className="mt-1 text-sm text-black">
           Rahbar va admin uchun Telegram profillarini sozlang. 18:00 va 19:00 xabarlar shu yerda berilgan ID’ga yuboriladi.
         </p>
       </header>

@@ -366,7 +366,7 @@ export function ScheduleWeekView({
                     >
                       <div className="min-w-0 space-y-0.5">
                         <p className="font-medium text-[var(--ink)]">{dayLabel}</p>
-                        <p className="text-xs text-[var(--muted)]">
+                        <p className="text-xs text-black">
                           {formatMinutesAsClock(L.startMinutes)}–{formatMinutesAsClock(L.endMinutes)}
                           {isCon ? (
                             <span className="ml-2 rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-900">

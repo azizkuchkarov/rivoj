@@ -78,14 +78,14 @@ export function LessonAttendanceDialog({ lesson, onClose }: LessonAttendanceDial
           <h2 id="attendance-dialog-title" className="font-display text-lg font-semibold text-[var(--ink)]">
             Dars holati
           </h2>
-          <p className="mt-1 text-sm text-[var(--muted)]">
+          <p className="mt-1 text-sm text-black">
             {dateLabel} · {lesson.teacher.listNumber ? `№${lesson.teacher.listNumber} ` : null}
             {lesson.teacher.fullName} · {lesson.student.fullName}
           </p>
           <p className="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm text-[var(--ink)]">
             Joriy holat: <strong>{attendanceLabel(lesson)}</strong>
           </p>
-          <p className="mt-2 text-xs text-[var(--muted)]">
+          <p className="mt-2 text-xs text-black">
             Belgilanganidan keyin «keldi / kelmadi» va to‘lovni qayta o‘zgartirib bo‘lmaydi.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -113,7 +113,7 @@ export function LessonAttendanceDialog({ lesson, onClose }: LessonAttendanceDial
         <h2 id="attendance-dialog-title" className="font-display text-lg font-semibold text-[var(--ink)]">
           Dars holati
         </h2>
-        <p className="mt-1 text-sm text-[var(--muted)]">
+        <p className="mt-1 text-sm text-black">
           {dateLabel} · {lesson.teacher.listNumber ? `№${lesson.teacher.listNumber} ` : null}
           {lesson.teacher.fullName} · {lesson.student.fullName}
         </p>

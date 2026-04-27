@@ -115,7 +115,7 @@ export default async function StudentDetailPage({ params }: PageProps) {
 
   return (
     <div className="space-y-8">
-      <nav className="text-sm text-[var(--muted)]">
+      <nav className="text-sm text-black">
         <Link href="/students" className="font-medium text-violet-800/90 underline-offset-4 hover:underline">
           O‘quvchilar
         </Link>

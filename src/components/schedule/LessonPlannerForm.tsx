@@ -310,7 +310,7 @@ export function LessonPlannerForm({
       {showPaymentBlock && !scheduleUnlocked ? (
         <section className="rounded-2xl border border-violet-100 bg-violet-50/40 p-6 shadow-inner shadow-violet-900/5">
           <h2 className="text-base font-semibold text-[var(--ink)]">To‘lov</h2>
-          <p className="mt-1 text-sm text-[var(--muted)]">
+          <p className="mt-1 text-sm text-black">
             Bir martalik yoki abonentlik. Keyin haftalik jadvalda bo‘sh vaqtlarni tanlaysiz.
           </p>
           {paymentGateError ? (
@@ -407,7 +407,7 @@ export function LessonPlannerForm({
                   className={plannerFieldClass()}
                   placeholder="50000"
                 />
-                <p className="mt-1 text-xs text-[var(--muted)]">
+                <p className="mt-1 text-xs text-black">
                   Kiritilgan summa har bir tanlangan dars uchun qo‘llanadi.
                 </p>
               </div>
@@ -455,7 +455,7 @@ export function LessonPlannerForm({
                       </span>
                     </p>
                   ) : (
-                    <p className="text-[var(--muted)]">Darslar soni va dars narxini kiriting.</p>
+                    <p className="text-black">Darslar soni va dars narxini kiriting.</p>
                   )}
                 </div>
               </>
@@ -497,7 +497,7 @@ export function LessonPlannerForm({
             >
               Jadvalga o‘tish — slotlarni tanlash
             </button>
-            <span className="text-sm text-[var(--muted)]">To‘lov ma’lumotlari keyin tasdiqlashda saqlanadi.</span>
+            <span className="text-sm text-black">To‘lov ma’lumotlari keyin tasdiqlashda saqlanadi.</span>
           </div>
         </section>
       ) : null}
@@ -514,7 +514,7 @@ export function LessonPlannerForm({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold text-[var(--ink)]">O‘qituvchining haftalik bandligi</p>
-              <p className="text-xs text-[var(--muted)]">
+              <p className="text-xs text-black">
                 Kunlar ustunda, soatlar chapda. Bo‘sh kataklarni bosing — bir nechta haftada tanlash mumkin (hafta
                 o‘zgarganda tanlovlar saqlanadi).
               </p>
@@ -565,7 +565,7 @@ export function LessonPlannerForm({
                   {dayIsos.map((d) => (
                     <th key={d} className="min-w-[100px] px-1 py-2 text-center font-semibold text-[var(--ink)]">
                       <div>{formatPlannerGridWeekdayUtc(d)}</div>
-                      <div className="text-[10px] font-normal text-[var(--muted)]">
+                      <div className="text-[10px] font-normal text-black">
                         {formatPlannerGridDayMonthUtc(d)}
                       </div>
                     </th>
@@ -673,7 +673,7 @@ export function LessonPlannerForm({
             </div>
           ) : null}
 
-          <ul className="flex flex-wrap gap-3 text-[11px] text-[var(--muted)]">
+          <ul className="flex flex-wrap gap-3 text-[11px] text-black">
             <li className="flex items-center gap-1.5">
               <span className="h-3 w-3 rounded border border-dashed border-zinc-300 bg-white/50" /> Bo‘sh
             </li>
@@ -736,7 +736,7 @@ export function LessonPlannerForm({
                 Tasdiqlash — {slotsPayload.length} ta darsni jadvalga qo‘shish
               </button>
               {slotsPayload.length === 0 ? (
-                <span className="text-sm text-[var(--muted)]">Kamida bitta bo‘sh slot tanlang.</span>
+                <span className="text-sm text-black">Kamida bitta bo‘sh slot tanlang.</span>
               ) : reuseSubscription && slotsPayload.length !== 1 ? (
                 <span className="text-sm text-emerald-900">
                   Qayta biriktirishda faqat bitta slot tanlanadi (hozir {slotsPayload.length} ta).

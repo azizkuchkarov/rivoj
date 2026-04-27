@@ -150,7 +150,7 @@ export function StudentScheduleSection({ lessons }: StudentScheduleSectionProps)
               <h2 className="font-display text-xl font-semibold tracking-tight text-[var(--ink)] md:text-2xl">
                 Dars jadvali
               </h2>
-              <p className="max-w-md text-sm leading-relaxed text-[var(--muted)]">
+              <p className="max-w-md text-sm leading-relaxed text-black">
                 Bugundan boshlab belgilangan darslar. Markaz bo‘limida barcha o‘qituvchilar jadvalini ko‘rasiz.
               </p>
             </div>
@@ -170,7 +170,7 @@ export function StudentScheduleSection({ lessons }: StudentScheduleSectionProps)
               <CalendarClock className="h-7 w-7 opacity-90" aria-hidden />
             </div>
             <p className="mt-5 font-medium text-[var(--ink)]">Kelajakdagi darslar hozircha yo‘q</p>
-            <p className="mt-1 text-sm text-[var(--muted)]">Yangi dars qo‘shish bilan shu yerda ro‘yxat paydo bo‘ladi.</p>
+            <p className="mt-1 text-sm text-black">Yangi dars qo‘shish bilan shu yerda ro‘yxat paydo bo‘ladi.</p>
             <Link
               href="/schedule/new"
               className="mt-6 inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-deep)] px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-teal-900/15 transition hover:brightness-[1.03]"

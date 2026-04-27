@@ -29,7 +29,7 @@ export default async function EditTeacherPage({ params }: PageProps) {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <nav className="text-sm text-[var(--muted)]">
+        <nav className="text-sm text-black">
           <Link href="/teachers" className="font-medium text-indigo-800 underline-offset-4 hover:underline">
             O‘qituvchilar
           </Link>
@@ -46,7 +46,7 @@ export default async function EditTeacherPage({ params }: PageProps) {
         <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--ink)] md:text-4xl">
           Profilni tahrirlash
         </h1>
-        <p className="text-[15px] text-[var(--muted)]">O‘zgarishlar saqlangach profil sahifasiga yo‘naltiriladi.</p>
+        <p className="text-[15px] text-black">O‘zgarishlar saqlangach profil sahifasiga yo‘naltiriladi.</p>
       </div>
 
       <div className="rounded-[2rem] border border-border bg-[color:var(--surface)] p-6 shadow-sm md:p-10">

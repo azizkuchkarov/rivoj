@@ -99,7 +99,7 @@ export function LessonForm({
               </option>
             ))}
           </select>
-          <p className="mt-2 text-xs leading-relaxed text-[var(--muted)]">
+          <p className="mt-2 text-xs leading-relaxed text-black">
             Har bir {isConsultation ? "konsultatsiya" : "dars"} 50 daqiqa (masalan 8:00–8:50). Keyingi slot yangi soat
             boshida — o‘qituvchi 9:00 da yangi bandlikni boshlashi mumkin.
           </p>

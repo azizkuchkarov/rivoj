@@ -39,7 +39,7 @@ export function TeacherPaymentsSection({
           <Banknote className="h-5 w-5 text-teal-600" aria-hidden />
           Sizga belgilangan to‘lovlar
         </h2>
-        <p className="text-sm text-[var(--muted)]">
+        <p className="text-sm text-black">
           Administrator to‘lovda sizni tanlaganda, shu yerda ko‘rinadigan ulushlar (kunlik yoki abonentlik bo‘yicha).
         </p>
         <p className="text-sm text-[var(--ink-soft)]">
@@ -58,7 +58,7 @@ export function TeacherPaymentsSection({
       <div className="mt-5 rounded-2xl border border-zinc-100 bg-white p-4">
         <h3 className="text-sm font-semibold text-[var(--ink)]">Har kunlik umumiy summa</h3>
         {dailyTotalRows.length === 0 ? (
-          <p className="mt-2 text-sm text-[var(--muted)]">Hozircha kunlik umumiy yozuv yo‘q.</p>
+          <p className="mt-2 text-sm text-black">Hozircha kunlik umumiy yozuv yo‘q.</p>
         ) : (
           <div className="mt-3 overflow-x-auto rounded-xl border border-zinc-100">
             <table className="w-full min-w-[360px] text-left text-sm">
@@ -91,7 +91,7 @@ export function TeacherPaymentsSection({
       </div>
 
       {payments.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-dashed border-indigo-200 bg-indigo-50 px-6 py-10 text-center text-sm text-[var(--muted)]">
+        <div className="mt-6 rounded-2xl border border-dashed border-indigo-200 bg-indigo-50 px-6 py-10 text-center text-sm text-black">
           Hozircha sizga biriktirilgan to‘lov yozuvlari yo‘q.
         </div>
       ) : (
@@ -136,13 +136,13 @@ export function TeacherPaymentsSection({
                     <td className="px-3 py-2.5 font-semibold tabular-nums text-teal-900">
                       {formatSomUZS(share)} so‘m
                     </td>
-                    <td className="max-w-[200px] px-3 py-2.5 text-xs text-[var(--muted)]" title={detail}>
+                    <td className="max-w-[200px] px-3 py-2.5 text-xs text-black" title={detail}>
                       {detail}
                     </td>
                     <td className="whitespace-nowrap px-3 py-2.5 text-[var(--ink-soft)]">
                       {paymentMethodLabel(p.method)}
                     </td>
-                    <td className="max-w-[180px] truncate px-3 py-2.5 text-[var(--muted)]" title={p.description ?? ""}>
+                    <td className="max-w-[180px] truncate px-3 py-2.5 text-black" title={p.description ?? ""}>
                       {p.description ?? "—"}
                     </td>
                   </tr>
@@ -153,7 +153,7 @@ export function TeacherPaymentsSection({
         </div>
       )}
 
-      <p className="mt-4 text-xs text-[var(--muted)]">
+      <p className="mt-4 text-xs text-black">
         Markazdagi barcha to‘lovlar:{" "}
         <Link href="/payments" className="font-medium text-teal-800 underline-offset-4 hover:underline">
           To‘lovlar
