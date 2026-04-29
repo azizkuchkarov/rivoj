@@ -29,7 +29,10 @@ export default async function NewLessonPage({ searchParams }: PageProps) {
         orderBy: [{ listNumber: "asc" }, { fullName: "asc" }],
         select: { id: true, fullName: true, isActive: true, listNumber: true },
       }),
-      prisma.student.findMany({ orderBy: { fullName: "asc" }, select: { id: true, fullName: true, isActive: true } }),
+      prisma.student.findMany({
+        orderBy: { fullName: "asc" },
+        select: { id: true, fullName: true, isActive: true, group: true },
+      }),
     ]);
   } catch {
     return <DbUnavailable />;

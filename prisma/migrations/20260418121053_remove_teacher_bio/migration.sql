@@ -5,7 +5,7 @@
 
 */
 -- DropIndex
-DROP INDEX "Lesson_consumedSubscriptionPaymentId_idx";
+DROP INDEX IF EXISTS "Lesson_consumedSubscriptionPaymentId_idx";
 
 -- AlterTable
 ALTER TABLE "Teacher" DROP COLUMN "bio";

@@ -13,6 +13,7 @@ import {
 import type { Student, Teacher } from "@/generated/prisma/client";
 import { LessonKind, PaymentKind, PaymentMethod } from "@/generated/prisma/enums";
 import { cn } from "@/lib/cn";
+import { STUDENT_GROUP_OPTIONS, type StudentGroupValue } from "@/lib/student-group";
 import { formatSlotRangeLabel, getSlotStartMinutesList } from "@/lib/time-minutes";
 import {
   formatPlannerGridDayMonthUtc,
@@ -34,7 +35,7 @@ function plannerFieldClass() {
 
 type LessonPlannerFormProps = {
   teachers: Pick<Teacher, "id" | "fullName" | "isActive" | "listNumber">[];
-  students: Pick<Student, "id" | "fullName" | "isActive">[];
+  students: Pick<Student, "id" | "fullName" | "isActive" | "group">[];
   initialTeacherId?: string;
   initialStudentId?: string;
   /** URL dan kelganda hafta */
@@ -65,6 +66,11 @@ export function LessonPlannerForm({
 }: LessonPlannerFormProps) {
   const activeTeachers = teachers.filter((t) => t.isActive);
   const activeStudents = students.filter((s) => s.isActive);
+  const [defaultGroup] = STUDENT_GROUP_OPTIONS;
+  const initialGroup = useMemo<StudentGroupValue>(() => {
+    const matched = activeStudents.find((s) => s.id === initialStudentId);
+    return (matched?.group as StudentGroupValue | undefined) ?? defaultGroup.value;
+  }, [activeStudents, defaultGroup.value, initialStudentId]);
 
   const defaultMonday =
     initialWeekMondayIso && /^\d{4}-\d{2}-\d{2}$/.test(initialWeekMondayIso)
@@ -73,6 +79,11 @@ export function LessonPlannerForm({
 
   const [teacherId, setTeacherId] = useState(() =>
     initialTeacherId && activeTeachers.some((t) => t.id === initialTeacherId) ? initialTeacherId : "",
+  );
+  const [studentGroup, setStudentGroup] = useState<StudentGroupValue>(initialGroup);
+  const filteredStudents = useMemo(
+    () => activeStudents.filter((s) => s.group === studentGroup),
+    [activeStudents, studentGroup],
   );
   const [studentId, setStudentId] = useState(() =>
     initialStudentId && activeStudents.some((s) => s.id === initialStudentId) ? initialStudentId : "",
@@ -89,16 +100,25 @@ export function LessonPlannerForm({
   const [payMethod, setPayMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
   const [payDescription, setPayDescription] = useState("");
   const [payNotes, setPayNotes] = useState("");
-  const [payTeacherShareSom, setPayTeacherShareSom] = useState("");
+  const [payTeacherSharePercent, setPayTeacherSharePercent] = useState("");
   const [paySubLessons, setPaySubLessons] = useState("");
-  const [paySubPerLesson, setPaySubPerLesson] = useState("");
+
+  const dailyTeacherSharePreview = useMemo(() => {
+    const amount = Number.parseInt(payAmountSom, 10);
+    const percent = Number.parseFloat(payTeacherSharePercent);
+    if (!Number.isFinite(amount) || !Number.isFinite(percent) || amount < 0 || percent < 0) return null;
+    return Math.round((amount * percent) / 100);
+  }, [payAmountSom, payTeacherSharePercent]);
 
   const subscriptionTeacherTotal = useMemo(() => {
     const n = Number.parseInt(paySubLessons, 10);
-    const p = Number.parseInt(paySubPerLesson, 10);
-    if (!Number.isFinite(n) || !Number.isFinite(p) || n < 1 || p < 0) return null;
-    return n * p;
-  }, [paySubLessons, paySubPerLesson]);
+    const amount = Number.parseInt(payAmountSom, 10);
+    const percent = Number.parseFloat(payTeacherSharePercent);
+    if (!Number.isFinite(n) || !Number.isFinite(amount) || !Number.isFinite(percent) || n < 1 || amount < 0 || percent < 0)
+      return null;
+    const perLesson = Math.round(((amount / n) * percent) / 100);
+    return n * perLesson;
+  }, [paySubLessons, payAmountSom, payTeacherSharePercent]);
 
   const subscriptionPackSize = useMemo(() => {
     const n = Number.parseInt(paySubLessons, 10);
@@ -129,6 +149,13 @@ export function LessonPlannerForm({
     const m = parseWeekMondayParam(weekMondayIso);
     setWeekMondayIso(toISODateStringUTC(addDaysUTC(m, delta * 7)));
   };
+
+  useEffect(() => {
+    if (studentId && !filteredStudents.some((s) => s.id === studentId)) {
+      setStudentId("");
+      setSelected(new Set());
+    }
+  }, [filteredStudents, studentId]);
 
   useEffect(() => {
     setScheduleUnlocked(reuseSubscription);
@@ -224,24 +251,28 @@ export function LessonPlannerForm({
       return;
     }
     if (payKind === PaymentKind.DAILY) {
-      const share = Number.parseInt(payTeacherShareSom, 10);
-      if (!Number.isFinite(share) || share < 0) {
-        setPaymentGateError("O‘qituvchi ulushini kiriting.");
+      const percent = Number.parseFloat(payTeacherSharePercent);
+      if (!Number.isFinite(percent)) {
+        setPaymentGateError("O‘qituvchi ulushi foizini kiriting.");
         return;
       }
-      if (share > amount) {
-        setPaymentGateError("O‘qituvchi ulushi jami to‘lovdan oshmasin.");
+      if (percent < 0 || percent > 100) {
+        setPaymentGateError("O‘qituvchi ulushi foizi 0 dan 100 gacha bo‘lsin.");
         return;
       }
     } else {
       const n = Number.parseInt(paySubLessons, 10);
-      const pl = Number.parseInt(paySubPerLesson, 10);
+      const percent = Number.parseFloat(payTeacherSharePercent);
       if (!Number.isFinite(n) || n < 1) {
         setPaymentGateError("Abonentlik: darslar sonini kiriting.");
         return;
       }
-      if (!Number.isFinite(pl) || pl < 0) {
-        setPaymentGateError("Har bir dars uchun o‘qituvchi ulushini kiriting.");
+      if (!Number.isFinite(percent)) {
+        setPaymentGateError("O‘qituvchi ulushi foizini kiriting.");
+        return;
+      }
+      if (percent < 0 || percent > 100) {
+        setPaymentGateError("O‘qituvchi ulushi foizi 0 dan 100 gacha bo‘lsin.");
         return;
       }
     }
@@ -285,6 +316,27 @@ export function LessonPlannerForm({
         </div>
 
         <div className="md:col-span-2">
+          <label className="mb-2 block text-sm font-medium text-[var(--ink-soft)]" htmlFor="planner-student-group">
+            O‘quvchi guruhi <span className="text-red-500">*</span>
+          </label>
+          <select
+            id="planner-student-group"
+            value={studentGroup}
+            onChange={(e) => {
+              const nextGroup = (e.target.value as StudentGroupValue) ?? defaultGroup.value;
+              setStudentGroup(nextGroup);
+            }}
+            className="w-full rounded-2xl border border-zinc-200/90 bg-white/80 px-4 py-3 text-[var(--ink)] shadow-inner shadow-black/5 outline-none focus:border-teal-300 focus:ring-4 focus:ring-teal-500/15"
+          >
+            {STUDENT_GROUP_OPTIONS.map((groupOption) => (
+              <option key={groupOption.value} value={groupOption.value}>
+                {groupOption.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="md:col-span-2">
           <label className="mb-2 block text-sm font-medium text-[var(--ink-soft)]" htmlFor="planner-student">
             O‘quvchi <span className="text-red-500">*</span>
           </label>
@@ -298,7 +350,7 @@ export function LessonPlannerForm({
             className="w-full rounded-2xl border border-zinc-200/90 bg-white/80 px-4 py-3 text-[var(--ink)] shadow-inner shadow-black/5 outline-none focus:border-teal-300 focus:ring-4 focus:ring-teal-500/15"
           >
             <option value="">Tanlang</option>
-            {activeStudents.map((s) => (
+            {filteredStudents.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.fullName}
               </option>
@@ -394,22 +446,28 @@ export function LessonPlannerForm({
             {payKind === PaymentKind.DAILY ? (
               <div className="md:col-span-2">
                 <label className="mb-2 block text-sm font-medium text-[var(--ink-soft)]" htmlFor="planner-pay-share">
-                  Shu to‘lovdan o‘qituvchiga (so‘m) <span className="text-red-500">*</span>
+                  O‘qituvchi ulushi (%) <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="planner-pay-share"
                   type="number"
                   min={0}
-                  step={1000}
-                  value={payTeacherShareSom}
-                  onChange={(e) => setPayTeacherShareSom(e.target.value)}
+                  max={100}
+                  step={0.01}
+                  value={payTeacherSharePercent}
+                  onChange={(e) => setPayTeacherSharePercent(e.target.value)}
                   onWheel={(e) => e.currentTarget.blur()}
                   className={plannerFieldClass()}
-                  placeholder="50000"
+                  placeholder="40"
                 />
                 <p className="mt-1 text-xs text-black">
-                  Kiritilgan summa har bir tanlangan dars uchun qo‘llanadi.
+                  Kiritilgan foiz har bir tanlangan dars to‘loviga qo‘llanadi.
                 </p>
+                {dailyTeacherSharePreview != null ? (
+                  <p className="mt-1 text-xs text-violet-900">
+                    Hisoblangan ulush: {dailyTeacherSharePreview.toLocaleString("uz-UZ")} so‘m
+                  </p>
+                ) : null}
               </div>
             ) : (
               <>
@@ -432,18 +490,19 @@ export function LessonPlannerForm({
                 </div>
                 <div>
                   <label className="mb-2 block text-sm font-medium text-[var(--ink-soft)]" htmlFor="planner-pay-sub-pl">
-                    Har bir dars uchun o‘qituvchiga (so‘m) <span className="text-red-500">*</span>
+                    O‘qituvchi ulushi (%) <span className="text-red-500">*</span>
                   </label>
                   <input
                     id="planner-pay-sub-pl"
                     type="number"
                     min={0}
-                    step={1000}
-                    value={paySubPerLesson}
-                    onChange={(e) => setPaySubPerLesson(e.target.value)}
+                    max={100}
+                    step={0.01}
+                    value={payTeacherSharePercent}
+                    onChange={(e) => setPayTeacherSharePercent(e.target.value)}
                     onWheel={(e) => e.currentTarget.blur()}
                     className={plannerFieldClass()}
-                    placeholder="50000"
+                    placeholder="40"
                   />
                 </div>
                 <div className="md:col-span-2 rounded-xl border border-violet-100 bg-white/60 px-4 py-3 text-sm text-violet-950">
@@ -701,9 +760,8 @@ export function LessonPlannerForm({
             <input type="hidden" name="paymentMethod" value={payMethod} />
             <input type="hidden" name="paymentDescription" value={payDescription} />
             <input type="hidden" name="paymentNotes" value={payNotes} />
-            <input type="hidden" name="paymentTeacherShareSom" value={payKind === PaymentKind.DAILY ? payTeacherShareSom : ""} />
+            <input type="hidden" name="paymentTeacherSharePercent" value={payTeacherSharePercent} />
             <input type="hidden" name="paymentSubscriptionLessonCount" value={payKind === PaymentKind.SUBSCRIPTION ? paySubLessons : ""} />
-            <input type="hidden" name="paymentTeacherSharePerLessonSom" value={payKind === PaymentKind.SUBSCRIPTION ? paySubPerLesson : ""} />
             <input type="hidden" name="reuseSubscription" value={reuseSubscription ? "1" : "0"} />
 
             <div>

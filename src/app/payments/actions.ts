@@ -22,9 +22,8 @@ function formDataToObject(formData: FormData) {
     method: String(formData.get("method") ?? "CASH"),
     description: String(formData.get("description") ?? ""),
     notes: String(formData.get("notes") ?? ""),
-    teacherShareSom: String(formData.get("teacherShareSom") ?? ""),
+    teacherSharePercent: String(formData.get("teacherSharePercent") ?? ""),
     subscriptionLessonCount: String(formData.get("subscriptionLessonCount") ?? ""),
-    teacherSharePerLessonSom: String(formData.get("teacherSharePerLessonSom") ?? ""),
     redirectAfter: String(formData.get("redirectAfter") ?? "payments"),
   };
 }
@@ -64,10 +63,12 @@ export async function createPayment(
   let subscriptionLessonsRemaining: number | null = null;
 
   if (data.kind === PaymentKind.DAILY) {
-    teacherShareSom = data.teacherShareSom ?? 0;
+    const percent = data.teacherSharePercent ?? 0;
+    teacherShareSom = Math.round((data.amountSom * percent) / 100);
   } else {
     subscriptionLessonCount = data.subscriptionLessonCount!;
-    teacherSharePerLessonSom = data.teacherSharePerLessonSom!;
+    const percent = data.teacherSharePercent ?? 0;
+    teacherSharePerLessonSom = Math.round(((data.amountSom / subscriptionLessonCount) * percent) / 100);
     teacherShareSom = subscriptionLessonCount * teacherSharePerLessonSom;
     subscriptionLessonsRemaining = subscriptionLessonCount;
   }

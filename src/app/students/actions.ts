@@ -25,6 +25,7 @@ function normalizeFullName(fullName: string): string {
 function formDataToObject(formData: FormData) {
   return {
     fullName: String(formData.get("fullName") ?? ""),
+    group: String(formData.get("group") ?? ""),
     dateOfBirth: String(formData.get("dateOfBirth") ?? ""),
     gender: String(formData.get("gender") ?? ""),
     guardianName: String(formData.get("guardianName") ?? ""),
@@ -74,6 +75,7 @@ export async function createStudent(
     student = await prisma.student.create({
       data: {
         fullName: normalizedFullName,
+        group: data.group,
         dateOfBirth: data.dateOfBirth,
         gender: data.gender,
         guardianName: data.guardianName,
@@ -134,6 +136,7 @@ export async function updateStudent(
       where: { id },
       data: {
         fullName: normalizedFullName,
+        group: data.group,
         dateOfBirth: data.dateOfBirth,
         gender: data.gender,
         guardianName: data.guardianName,

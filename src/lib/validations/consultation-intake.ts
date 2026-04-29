@@ -4,6 +4,7 @@ import {
   CENTER_DAY_START_MINUTES,
   LAST_LESSON_START_HOUR,
 } from "@/lib/schedule-config";
+import { STUDENT_GROUP_VALUES } from "@/lib/student-group";
 import { getSlotStartMinutesList } from "@/lib/time-minutes";
 
 const ALLOWED_STARTS = new Set(getSlotStartMinutesList());
@@ -23,6 +24,7 @@ function numFromForm(v: unknown): number | undefined {
 export const consultationIntakeSchema = z
   .object({
     fullName: z.string().trim().min(2, "Ism kamida 2 belgi bo‘lishi kerak").max(120),
+    group: z.enum(STUDENT_GROUP_VALUES, { message: "Guruhni tanlang" }),
     guardianName: z.preprocess(emptyToUndefined, z.string().trim().max(120).optional()),
     guardianPhone: z.preprocess(emptyToUndefined, z.string().trim().max(32).optional()),
     teacherId: z.string().min(1, "O‘qituvchini tanlang"),

@@ -55,15 +55,26 @@ export function PaymentForm({
   const activeTeachers = teachers.filter((t) => t.isActive);
 
   const [kind, setKind] = useState<PaymentKind>(defaultKind);
+  const [amountSom, setAmountSom] = useState("");
+  const [teacherSharePercent, setTeacherSharePercent] = useState("");
   const [subLessons, setSubLessons] = useState("");
-  const [subPerLesson, setSubPerLesson] = useState("");
+
+  const teacherShareSomPreview = useMemo(() => {
+    const amount = Number.parseInt(amountSom, 10);
+    const percent = Number.parseFloat(teacherSharePercent);
+    if (!Number.isFinite(amount) || !Number.isFinite(percent) || amount < 0 || percent < 0) return null;
+    return Math.round((amount * percent) / 100);
+  }, [amountSom, teacherSharePercent]);
 
   const subscriptionTeacherTotal = useMemo(() => {
     const n = Number.parseInt(subLessons, 10);
-    const p = Number.parseInt(subPerLesson, 10);
-    if (!Number.isFinite(n) || !Number.isFinite(p) || n < 1 || p < 0) return null;
-    return n * p;
-  }, [subLessons, subPerLesson]);
+    const amount = Number.parseInt(amountSom, 10);
+    const percent = Number.parseFloat(teacherSharePercent);
+    if (!Number.isFinite(n) || !Number.isFinite(amount) || !Number.isFinite(percent) || n < 1 || amount < 0 || percent < 0)
+      return null;
+    const perLesson = Math.round(((amount / n) * percent) / 100);
+    return n * perLesson;
+  }, [subLessons, amountSom, teacherSharePercent]);
 
   return (
     <form action={formAction} className="space-y-8">
@@ -147,6 +158,8 @@ export function PaymentForm({
             required
             min={1000}
             step={1000}
+            value={amountSom}
+            onChange={(e) => setAmountSom(e.target.value)}
             onWheel={(e) => e.currentTarget.blur()}
             placeholder={kind === PaymentKind.DAILY ? "100000" : "1000000"}
             className={fieldClass(state.fieldErrors?.amountSom)}
@@ -194,25 +207,33 @@ export function PaymentForm({
               ) : null}
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-[var(--ink-soft)]" htmlFor="teacherShareSom">
-                Shu to‘lovdan o‘qituvchiga (so‘m) <span className="text-red-500">*</span>
+              <label className="mb-2 block text-sm font-medium text-[var(--ink-soft)]" htmlFor="teacherSharePercent">
+                O‘qituvchi ulushi (%) <span className="text-red-500">*</span>
               </label>
               <input
-                id="teacherShareSom"
-                name="teacherShareSom"
+                id="teacherSharePercent"
+                name="teacherSharePercent"
                 type="number"
                 required
                 min={0}
-                step={1000}
+                max={100}
+                step={0.01}
+                value={teacherSharePercent}
+                onChange={(e) => setTeacherSharePercent(e.target.value)}
                 onWheel={(e) => e.currentTarget.blur()}
-                placeholder="50000"
-                className={fieldClass(state.fieldErrors?.teacherShareSom)}
+                placeholder="40"
+                className={fieldClass(state.fieldErrors?.teacherSharePercent)}
               />
               <p className="mt-1.5 text-xs text-black">
-                Masalan: bola 190 000 so‘m to‘lasa, o‘qituvchiga 80 000 so‘m yoziladi.
+                Masalan: 130 000 so‘m va 40% bo‘lsa, o‘qituvchiga 52 000 so‘m yoziladi.
               </p>
-              {state.fieldErrors?.teacherShareSom ? (
-                <p className="mt-1.5 text-xs text-red-600">{state.fieldErrors.teacherShareSom}</p>
+              {teacherShareSomPreview != null ? (
+                <p className="mt-1.5 text-xs text-violet-900">
+                  Hisoblangan ulush: {teacherShareSomPreview.toLocaleString("uz-UZ")} so‘m
+                </p>
+              ) : null}
+              {state.fieldErrors?.teacherSharePercent ? (
+                <p className="mt-1.5 text-xs text-red-600">{state.fieldErrors.teacherSharePercent}</p>
               ) : null}
             </div>
           </div>
@@ -246,25 +267,26 @@ export function PaymentForm({
             <div>
               <label
                 className="mb-2 block text-sm font-medium text-[var(--ink-soft)]"
-                htmlFor="teacherSharePerLessonSom"
+                htmlFor="teacherSharePercentSub"
               >
-                Har bir dars uchun o‘qituvchiga (so‘m) <span className="text-red-500">*</span>
+                O‘qituvchi ulushi (%) <span className="text-red-500">*</span>
               </label>
               <input
-                id="teacherSharePerLessonSom"
-                name="teacherSharePerLessonSom"
+                id="teacherSharePercentSub"
+                name="teacherSharePercent"
                 type="number"
                 required
                 min={0}
-                step={1000}
+                max={100}
+                step={0.01}
+                value={teacherSharePercent}
+                onChange={(e) => setTeacherSharePercent(e.target.value)}
                 onWheel={(e) => e.currentTarget.blur()}
-                placeholder="50000"
-                value={subPerLesson}
-                onChange={(e) => setSubPerLesson(e.target.value)}
-                className={fieldClass(state.fieldErrors?.teacherSharePerLessonSom)}
+                placeholder="40"
+                className={fieldClass(state.fieldErrors?.teacherSharePercent)}
               />
-              {state.fieldErrors?.teacherSharePerLessonSom ? (
-                <p className="mt-1.5 text-xs text-red-600">{state.fieldErrors.teacherSharePerLessonSom}</p>
+              {state.fieldErrors?.teacherSharePercent ? (
+                <p className="mt-1.5 text-xs text-red-600">{state.fieldErrors.teacherSharePercent}</p>
               ) : null}
             </div>
             <div className="md:col-span-2 rounded-2xl border border-violet-100 bg-violet-50/50 px-4 py-3 text-sm text-violet-950">

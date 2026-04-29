@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { STUDENT_GENDER_VALUES } from "@/lib/student-gender";
+import { STUDENT_GROUP_VALUES } from "@/lib/student-group";
 
 function emptyToUndefined(s: string | undefined) {
   const t = s?.trim();
@@ -9,6 +10,7 @@ function emptyToUndefined(s: string | undefined) {
 
 export const studentFormSchema = z.object({
   fullName: z.string().trim().min(2, "Ism kamida 2 belgi bo‘lishi kerak").max(120),
+  group: z.enum(STUDENT_GROUP_VALUES, { message: "Guruhni tanlang" }),
   dateOfBirth: z.preprocess(
     (v) => (v === "" || v === undefined || v === null ? undefined : String(v)),
     z

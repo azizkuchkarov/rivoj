@@ -69,6 +69,7 @@ export async function getTeacherDayScheduleForIntake(
 function intakeFormToObject(formData: FormData) {
   return {
     fullName: String(formData.get("fullName") ?? ""),
+    group: String(formData.get("group") ?? ""),
     guardianName: String(formData.get("guardianName") ?? ""),
     guardianPhone: String(formData.get("guardianPhone") ?? ""),
     teacherId: String(formData.get("teacherId") ?? ""),
@@ -109,6 +110,7 @@ export async function registerConsultationIntake(
     const created = await prisma.student.create({
       data: {
         fullName: normalizedFullName,
+        group: data.group,
         guardianName: data.guardianName,
         guardianPhone: data.guardianPhone,
         isActive: true,

@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { STUDENT_GROUP_OPTIONS, type StudentGroupValue } from "@/lib/student-group";
 import { studentFormSchema } from "@/lib/validations/student";
 import { STUDENT_GENDER_OPTIONS } from "@/lib/student-gender";
 
@@ -30,6 +31,7 @@ type StudentFormProps = {
     Pick<
       Student,
       | "fullName"
+      | "group"
       | "dateOfBirth"
       | "gender"
       | "guardianName"
@@ -46,6 +48,7 @@ type StudentFormProps = {
 
 type FormInput = {
   fullName: string;
+  group: StudentGroupValue;
   dateOfBirth: string;
   gender: string;
   guardianName: string;
@@ -76,6 +79,9 @@ export function StudentForm({ action, teachers, defaultValues, submitLabel }: St
   const form = useForm<FormInput>({
     defaultValues: {
       fullName: dv.fullName ?? "",
+      group:
+        STUDENT_GROUP_OPTIONS.find((groupOption) => groupOption.value === dv.group)?.value ??
+        STUDENT_GROUP_OPTIONS[0]!.value,
       dateOfBirth: formatDateInput(dv.dateOfBirth),
       gender: legacyGender
         ? legacyGender
@@ -136,6 +142,26 @@ export function StudentForm({ action, teachers, defaultValues, submitLabel }: St
             <FieldContent>
               <Input id="fullName" autoComplete="name" placeholder="Masalan: Amir Karimov" {...register("fullName")} />
               <FieldError errors={[formState.errors.fullName]} />
+            </FieldContent>
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="group">
+              Guruh <span className="text-destructive">*</span>
+            </FieldLabel>
+            <FieldContent>
+              <select
+                id="group"
+                className="flex h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                {...register("group")}
+              >
+                {STUDENT_GROUP_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+              <FieldError errors={[formState.errors.group]} />
             </FieldContent>
           </Field>
 

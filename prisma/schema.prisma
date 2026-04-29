@@ -55,6 +55,13 @@ enum SystemProfileRole {
   ADMIN
 }
 
+enum StudentGroup {
+  LOGOPED
+  ABA
+  SENSORY_INTEGRATION
+  SENSORIMOTOR
+}
+
 /// Logopedik markaz mutaxassisi
 model Teacher {
   id              String    @id @default(cuid())
@@ -100,6 +107,7 @@ model Student {
   /// Telegram bot uchun chat/user ID (botga /start bergan bo‘lishi kerak)
   telegramChatId String?
   notes         String?   @db.Text
+  group         StudentGroup @default(LOGOPED)
   /// Mashg‘ulot / ehtiyoj yo‘nalishlari
   focusAreas String[] @default([])
   isActive   Boolean  @default(true)

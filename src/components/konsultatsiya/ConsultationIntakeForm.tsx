@@ -12,6 +12,7 @@ import {
 import type { Teacher } from "@/generated/prisma/client";
 import { cn } from "@/lib/cn";
 import { LESSON_DURATION_MINUTES } from "@/lib/schedule-config";
+import { STUDENT_GROUP_OPTIONS, type StudentGroupValue } from "@/lib/student-group";
 import { formatMinutesAsClock, formatSlotRangeLabel, getSlotStartMinutesList } from "@/lib/time-minutes";
 
 type ConsultationIntakeFormProps = {
@@ -25,6 +26,7 @@ function rangesOverlap(aStart: number, aEnd: number, bStart: number, bEnd: numbe
 
 export function ConsultationIntakeForm({ teachers, defaultDate }: ConsultationIntakeFormProps) {
   const [state, formAction, pending] = useActionState(registerConsultationIntake, {});
+  const [studentGroup, setStudentGroup] = useState<StudentGroupValue>("LOGOPED");
   const [teacherId, setTeacherId] = useState("");
   const [lessonDate, setLessonDate] = useState(defaultDate);
   const [blocks, setBlocks] = useState<TeacherDayBlock[]>([]);
@@ -109,6 +111,26 @@ export function ConsultationIntakeForm({ teachers, defaultDate }: ConsultationIn
             {state.fieldErrors?.fullName ? (
               <p className="mt-1.5 text-xs text-red-600">{state.fieldErrors.fullName}</p>
             ) : null}
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-[var(--ink-soft)]" htmlFor="group">
+              Guruh <span className="text-red-500">*</span>
+            </label>
+            <select
+              id="group"
+              name="group"
+              required
+              value={studentGroup}
+              onChange={(e) => setStudentGroup((e.target.value as StudentGroupValue) ?? "LOGOPED")}
+              className="w-full rounded-2xl border border-zinc-200/90 bg-white/80 px-4 py-3"
+            >
+              {STUDENT_GROUP_OPTIONS.map((groupOption) => (
+                <option key={groupOption.value} value={groupOption.value}>
+                  {groupOption.label}
+                </option>
+              ))}
+            </select>
+            {state.fieldErrors?.group ? <p className="mt-1.5 text-xs text-red-600">{state.fieldErrors.group}</p> : null}
           </div>
           <div>
             <label className="mb-2 block text-sm font-medium text-[var(--ink-soft)]" htmlFor="guardianPhone">

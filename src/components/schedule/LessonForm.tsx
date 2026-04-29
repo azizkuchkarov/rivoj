@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo } from "react";
+import { useActionState, useMemo, useState } from "react";
 
 import { Loader2 } from "lucide-react";
 
@@ -8,6 +8,7 @@ import type { LessonActionState } from "@/app/schedule/actions";
 import type { Student, Teacher } from "@/generated/prisma/client";
 import { LessonKind } from "@/generated/prisma/enums";
 import { cn } from "@/lib/cn";
+import { STUDENT_GROUP_OPTIONS, type StudentGroupValue } from "@/lib/student-group";
 import { formatSlotRangeLabel, getSlotStartMinutesList } from "@/lib/time-minutes";
 
 type LessonFormProps = {
@@ -15,7 +16,7 @@ type LessonFormProps = {
   /** Dars jadvali yoki konsultatsiya jadvali yozuvi */
   lessonKind?: (typeof LessonKind)[keyof typeof LessonKind];
   teachers: Pick<Teacher, "id" | "fullName" | "isActive" | "listNumber">[];
-  students: Pick<Student, "id" | "fullName" | "isActive">[];
+  students: Pick<Student, "id" | "fullName" | "isActive" | "group">[];
   defaultLessonDate: string;
   /** Jadvaldan kelganda (URL) */
   defaultTeacherId?: string;
@@ -45,6 +46,16 @@ export function LessonForm({
 
   const activeTeachers = teachers.filter((t) => t.isActive);
   const activeStudents = students.filter((s) => s.isActive);
+  const [defaultGroup] = STUDENT_GROUP_OPTIONS;
+  const studentsByGroup = new Map(
+    STUDENT_GROUP_OPTIONS.map((groupOption) => [
+      groupOption.value,
+      activeStudents.filter((student) => student.group === groupOption.value),
+    ]),
+  );
+  const [studentGroup, setStudentGroup] = useState<StudentGroupValue>(defaultGroup.value);
+  const groupStudents = studentsByGroup.get(studentGroup) ?? [];
+  const [studentId, setStudentId] = useState("");
   const isConsultation = lessonKind === LessonKind.CONSULTATION;
 
   const teacherDefault =
@@ -131,6 +142,28 @@ export function LessonForm({
         </div>
 
         <div className="md:col-span-2">
+          <label className="mb-2 block text-sm font-medium text-[var(--ink-soft)]" htmlFor="studentGroup">
+            O‘quvchi guruhi
+          </label>
+          <select
+            id="studentGroup"
+            name="studentGroup"
+            value={studentGroup}
+            onChange={(e) => {
+              setStudentGroup((e.target.value as StudentGroupValue) ?? defaultGroup.value);
+              setStudentId("");
+            }}
+            className={fieldClass()}
+          >
+            {STUDENT_GROUP_OPTIONS.map((groupOption) => (
+              <option key={groupOption.value} value={groupOption.value}>
+                {groupOption.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="md:col-span-2">
           <label className="mb-2 block text-sm font-medium text-[var(--ink-soft)]" htmlFor="studentId">
             O‘quvchi
           </label>
@@ -139,12 +172,13 @@ export function LessonForm({
             name="studentId"
             required
             className={fieldClass(state.fieldErrors?.studentId)}
-            defaultValue=""
+            value={studentId}
+            onChange={(e) => setStudentId(e.target.value)}
           >
             <option value="" disabled>
               Tanlang
             </option>
-            {activeStudents.map((s) => (
+            {groupStudents.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.fullName}
               </option>

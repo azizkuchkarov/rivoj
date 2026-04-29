@@ -13,6 +13,13 @@ function numFromForm(v: unknown): number | undefined {
   return Number.isFinite(n) ? Math.trunc(n) : undefined;
 }
 
+function percentFromForm(v: unknown): number | undefined {
+  if (v === "" || v === undefined || v === null) return undefined;
+  const n = Number(v);
+  if (!Number.isFinite(n)) return undefined;
+  return Math.round(n * 100) / 100;
+}
+
 export const paymentFormSchema = z
   .object({
     studentId: z.string().min(1, "O‘quvchini tanlang"),
@@ -23,9 +30,8 @@ export const paymentFormSchema = z
     method: z.nativeEnum(PaymentMethod),
     description: z.preprocess(emptyToUndefined, z.string().max(500).optional()),
     notes: z.preprocess(emptyToUndefined, z.string().max(2000).optional()),
-    teacherShareSom: z.preprocess(numFromForm, z.number().int().optional()),
+    teacherSharePercent: z.preprocess(percentFromForm, z.number().optional()),
     subscriptionLessonCount: z.preprocess(numFromForm, z.number().int().optional()),
-    teacherSharePerLessonSom: z.preprocess(numFromForm, z.number().int().optional()),
     redirectAfter: z.preprocess(
       (v) => (v === "student" ? "student" : "payments"),
       z.enum(["payments", "student"]),
@@ -40,26 +46,19 @@ export const paymentFormSchema = z
           path: ["teacherId"],
         });
       }
-      if (data.teacherShareSom === undefined) {
+      if (data.teacherSharePercent === undefined) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "O‘qituvchi ulushini kiriting",
-          path: ["teacherShareSom"],
+          message: "O‘qituvchi ulushi foizini kiriting",
+          path: ["teacherSharePercent"],
         });
         return;
       }
-      if (data.teacherShareSom < 0) {
+      if (data.teacherSharePercent < 0 || data.teacherSharePercent > 100) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Manfiy bo‘lmasin",
-          path: ["teacherShareSom"],
-        });
-      }
-      if (data.teacherShareSom > data.amountSom) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "O‘qituvchi ulushi jami to‘lovdan oshmasin",
-          path: ["teacherShareSom"],
+          message: "Foiz 0 dan 100 gacha bo‘lsin",
+          path: ["teacherSharePercent"],
         });
       }
     }
@@ -71,19 +70,19 @@ export const paymentFormSchema = z
           path: ["subscriptionLessonCount"],
         });
       }
-      if (data.teacherSharePerLessonSom === undefined) {
+      if (data.teacherSharePercent === undefined) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Har bir dars uchun o‘qituvchi ulushini kiriting",
-          path: ["teacherSharePerLessonSom"],
+          message: "O‘qituvchi ulushi foizini kiriting",
+          path: ["teacherSharePercent"],
         });
         return;
       }
-      if (data.teacherSharePerLessonSom < 0) {
+      if (data.teacherSharePercent < 0 || data.teacherSharePercent > 100) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: "Manfiy bo‘lmasin",
-          path: ["teacherSharePerLessonSom"],
+          message: "Foiz 0 dan 100 gacha bo‘lsin",
+          path: ["teacherSharePercent"],
         });
       }
     }

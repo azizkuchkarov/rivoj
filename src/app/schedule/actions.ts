@@ -152,9 +152,8 @@ export async function createLessonBatch(
       method: String(formData.get("paymentMethod") ?? "CASH"),
       description: String(formData.get("paymentDescription") ?? "").trim() || undefined,
       notes: String(formData.get("paymentNotes") ?? "").trim() || undefined,
-      teacherShareSom: String(formData.get("paymentTeacherShareSom") ?? ""),
+      teacherSharePercent: String(formData.get("paymentTeacherSharePercent") ?? ""),
       subscriptionLessonCount: String(formData.get("paymentSubscriptionLessonCount") ?? ""),
-      teacherSharePerLessonSom: String(formData.get("paymentTeacherSharePerLessonSom") ?? ""),
       redirectAfter: "payments",
     });
 
@@ -185,10 +184,12 @@ export async function createLessonBatch(
 
       if (pay) {
         if (pay.kind === PaymentKind.DAILY) {
-          teacherShareSom = pay.teacherShareSom ?? 0;
+          const percent = pay.teacherSharePercent ?? 0;
+          teacherShareSom = Math.round((pay.amountSom * percent) / 100);
         } else {
           subscriptionLessonCount = pay.subscriptionLessonCount!;
-          teacherSharePerLessonSom = pay.teacherSharePerLessonSom!;
+          const percent = pay.teacherSharePercent ?? 0;
+          teacherSharePerLessonSom = Math.round(((pay.amountSom / subscriptionLessonCount) * percent) / 100);
           teacherShareSom = subscriptionLessonCount * teacherSharePerLessonSom;
           subscriptionLessonsRemaining = subscriptionLessonCount;
         }
