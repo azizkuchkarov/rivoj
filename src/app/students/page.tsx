@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { UserPlus, Users } from "lucide-react";
+import { ChartColumnBig, UserPlus, Users } from "lucide-react";
 
 import { StudentsDataTable } from "@/components/students/StudentsDataTable";
 import type { StudentRow } from "@/components/students/students-columns";
@@ -45,13 +45,22 @@ export default async function StudentsPage() {
             Ro‘yxat va qidiruv: vasiy va asosiy o‘qituvchi ustunlarida tez orientatsiya.
           </p>
         </div>
-        <Link
-          href="/students/new"
-          className={cn(buttonVariants({ size: "lg" }), "inline-flex h-10 shrink-0 items-center gap-2")}
-        >
-          <UserPlus className="size-4" aria-hidden />
-          Yangi o‘quvchi
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/students/manbalar"
+            className={cn(buttonVariants({ variant: "outline", size: "lg" }), "inline-flex h-10 shrink-0 items-center gap-2")}
+          >
+            <ChartColumnBig className="size-4" aria-hidden />
+            Manbalar statistikasi
+          </Link>
+          <Link
+            href="/students/new"
+            className={cn(buttonVariants({ size: "lg" }), "inline-flex h-10 shrink-0 items-center gap-2")}
+          >
+            <UserPlus className="size-4" aria-hidden />
+            Yangi o‘quvchi
+          </Link>
+        </div>
       </div>
 
       {students.length === 0 ? (

@@ -1,0 +1,6 @@
+-- CreateEnum
+CREATE TYPE "StudentSource" AS ENUM ('INSTAGRAM', 'TELEGRAM', 'YOUTUBE', 'TAVSIYA_TANISH', 'KOCHA_ESKI');
+
+-- AlterTable
+ALTER TABLE "Student"
+ADD COLUMN "source" "StudentSource" NOT NULL DEFAULT 'KOCHA_ESKI';

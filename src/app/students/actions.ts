@@ -26,6 +26,7 @@ function formDataToObject(formData: FormData) {
   return {
     fullName: String(formData.get("fullName") ?? ""),
     group: String(formData.get("group") ?? ""),
+    source: String(formData.get("source") ?? ""),
     dateOfBirth: String(formData.get("dateOfBirth") ?? ""),
     gender: String(formData.get("gender") ?? ""),
     guardianName: String(formData.get("guardianName") ?? ""),
@@ -76,6 +77,7 @@ export async function createStudent(
       data: {
         fullName: normalizedFullName,
         group: data.group,
+        source: data.source,
         dateOfBirth: data.dateOfBirth,
         gender: data.gender,
         guardianName: data.guardianName,
@@ -92,6 +94,7 @@ export async function createStudent(
     return { error: msg };
   }
   revalidatePath("/students");
+  revalidatePath("/students/manbalar");
   redirect(`/students/${student.id}`);
 }
 
@@ -137,6 +140,7 @@ export async function updateStudent(
       data: {
         fullName: normalizedFullName,
         group: data.group,
+        source: data.source,
         dateOfBirth: data.dateOfBirth,
         gender: data.gender,
         guardianName: data.guardianName,
@@ -153,6 +157,7 @@ export async function updateStudent(
     return { error: msg };
   }
   revalidatePath("/students");
+  revalidatePath("/students/manbalar");
   revalidatePath(`/students/${id}`);
   revalidatePath(`/students/${id}/edit`);
   redirect(`/students/${id}`);
@@ -167,6 +172,7 @@ export async function deleteStudent(formData: FormData) {
     redirect(`/students/${id}`);
   }
   revalidatePath("/students");
+  revalidatePath("/students/manbalar");
   revalidatePath("/schedule");
   revalidatePath("/konsultatsiya");
   revalidatePath("/konsultatsiya/qabul");

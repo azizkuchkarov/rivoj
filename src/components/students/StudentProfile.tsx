@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Baby, Calendar, Pencil, Phone, User } from "lucide-react";
+import { Baby, Calendar, Pencil, Phone, User, Waypoints } from "lucide-react";
 
 import { deleteStudent } from "@/app/students/actions";
 import { DeleteConfirmForm } from "@/components/common/DeleteConfirmForm";
@@ -15,6 +15,7 @@ import type { Payment, Student, Teacher } from "@/generated/prisma/client";
 import { LessonAttendance, LessonGuardianFee } from "@/generated/prisma/enums";
 import { ageFromDateOfBirth } from "@/lib/age";
 import { formatStudentGender } from "@/lib/student-gender";
+import { formatStudentSource } from "@/lib/student-source";
 
 type PaymentWithTeacher = Payment & {
   teacher: Pick<Teacher, "id" | "fullName"> | null;
@@ -64,6 +65,7 @@ export function StudentProfile({
 
   const age = student.dateOfBirth != null ? ageFromDateOfBirth(student.dateOfBirth) : null;
   const genderLabel = formatStudentGender(student.gender);
+  const sourceLabel = formatStudentSource(student.source);
 
   return (
     <div className="space-y-8">
@@ -145,6 +147,10 @@ export function StudentProfile({
           <p className="inline-flex items-center gap-2">
             <Calendar className="h-4 w-4 text-violet-700" aria-hidden />
             <span className="font-medium text-[var(--ink)]">Ro‘yxatga olingan:</span> {created}
+          </p>
+          <p className="inline-flex items-center gap-2">
+            <Waypoints className="h-4 w-4 text-violet-700" aria-hidden />
+            <span className="font-medium text-[var(--ink)]">Kelgan manbasi:</span> {sourceLabel}
           </p>
           <p className="md:col-span-2">
             <span className="font-medium text-[var(--ink)]">Asosiy o‘qituvchi:</span>{" "}
